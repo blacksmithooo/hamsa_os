@@ -100,7 +100,8 @@ import { asset } from '../lib/asset';
       lines[0].style.opacity = String((1 - tText) * (1 - tFade));
       lines[1].style.opacity = String(tText * (1 - tFade));
       // As the ring forms, "Request a demo" plays in word by word (CSS transition on the class).
-      const ctaIn = u >= 0.45;
+      // On the way back up the words leave as soon as the reverse starts, not when the shape gets there.
+      const ctaIn = u >= 0.45 && (reduce || p >= TRIGGER);
       root.classList.toggle('is-cta-in', ctaIn);
       cta.style.pointerEvents = ctaIn ? 'auto' : 'none';
       // The text box stays the final pill size so the words never re-centre (that made them wobble);
