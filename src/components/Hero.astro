@@ -1,10 +1,11 @@
 ---
+import { asset } from '../lib/asset';
 // Figma: headline (181:3002), subhead (181:3003) and "Bird" image (181:3019); section spans y 0–726.
 ---
 <section class="hero">
   <img
     class="hero__bird"
-    src="/images/hero-bird.webp"
+    src={asset('images/hero-bird.webp')}
     alt="A starling perched on a budding branch"
     width="401"
     height="355"
