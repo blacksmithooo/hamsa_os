@@ -37,7 +37,7 @@ const clocks = [
   </div>
 </header>
 
-<div class="menu" id="site-menu" hidden data-menu style={`--menu-bg: ${shades[0]}`}>
+<div class="menu" id="site-menu" hidden data-menu data-first-shade={shades[0]} style={`--menu-bg: ${shades[0]}`}>
   <div class="menu__bar"><div class="menu__frame">
     <a class="menu__logo" href={asset('')} aria-label="Hamsa home">
       <img src={asset('images/icons/hamsa-logo-white.svg')} alt="Hamsa" width="143" height="62" />
@@ -45,8 +45,8 @@ const clocks = [
     <button class="menu__close" type="button" aria-label="Close menu" data-menu-close></button>
   </div></div>
   <div class="menu__frame menu__body">
-  <p class="menu__tagline">Powering<br />the Finternet</p>
-  <ul class="menu__clocks">
+  <p class="menu__tagline" data-stagger>Powering<br />the Finternet</p>
+  <ul class="menu__clocks" data-stagger>
     {clocks.map(([tz, city]) => (
       <li><span data-tz={tz}>--:--</span>&nbsp;&nbsp;({city})</li>
     ))}
@@ -54,10 +54,10 @@ const clocks = [
   <nav class="menu__nav" aria-label="Main">
     {numbered.map((col) => (
       <div class={`menu__col menu__col--${col.label.toLowerCase()}`}>
-        <p class="menu__label">{col.label}</p>
+        <p class="menu__label" data-stagger>{col.label}</p>
         <ul>
           {col.items.map((item) => (
-            <li>
+            <li data-stagger>
               <a href="#" style={`--shade: ${shades[item.i]}`}>
                 <span class="menu__num">{String(item.i + 1).padStart(2, '0')}</span>
                 <span set:html={item.html} />
@@ -76,12 +76,32 @@ const clocks = [
   const openBtn = document.querySelector<HTMLButtonElement>('[data-menu-open]')!;
   const closeBtn = document.querySelector<HTMLButtonElement>('[data-menu-close]')!;
 
+  // Open: diagonal colour swipe from the menu button's corner (500ms), then the items
+  // drop in one by one (25ms apart). Close: the swipe runs back, faster.
+  const staggered = [...menu.querySelectorAll<HTMLElement>('[data-stagger]')];
+  staggered.forEach((el, i) => el.style.setProperty('--d', `${160 + i * 25}ms`));
+  let closeTimer = 0;
+
   const setOpen = (open: boolean) => {
-    menu.hidden = !open;
+    clearTimeout(closeTimer);
     openBtn.setAttribute('aria-expanded', String(open));
     document.documentElement.style.overflow = open ? 'hidden' : '';
-    if (open) closeBtn.focus();
-    else openBtn.focus();
+    if (open) {
+      menu.classList.remove('is-open', 'is-closing');
+      menu.hidden = false;
+      void menu.offsetWidth; // start the transition from the closed state
+      menu.classList.add('is-open');
+      closeBtn.focus({ preventScroll: true });
+    } else {
+      menu.classList.remove('is-open');
+      menu.classList.add('is-closing');
+      closeTimer = window.setTimeout(() => {
+        menu.hidden = true;
+        menu.classList.remove('is-closing');
+        menu.style.setProperty('--menu-bg', menu.dataset.firstShade!);
+      }, 320);
+      openBtn.focus({ preventScroll: true });
+    }
   };
   openBtn.addEventListener('click', () => setOpen(true));
   closeBtn.addEventListener('click', () => setOpen(false));
@@ -165,6 +185,30 @@ const clocks = [
     transition: background-color 300ms ease;
   }
   .menu[hidden] { display: none; }
+
+  /* Diagonal swipe: a triangle anchored at the top-right corner whose long edge sweeps across. */
+  .menu {
+    clip-path: polygon(100% 0, 100% 0, 100% 0);
+    transition: background-color 300ms ease, clip-path 320ms cubic-bezier(0.7, 0, 0.84, 0);
+  }
+  .menu.is-open {
+    clip-path: polygon(100% 0, -130% 0, 100% 230%);
+    transition: background-color 300ms ease, clip-path 500ms cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .menu [data-stagger] {
+    opacity: 0;
+    transform: translateY(14px);
+    transition: opacity 120ms ease, transform 120ms ease;
+  }
+  .menu.is-open [data-stagger] {
+    opacity: 1;
+    transform: none;
+    transition: opacity 260ms ease var(--d), transform 320ms cubic-bezier(0.16, 1, 0.3, 1) var(--d);
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .menu, .menu.is-open { clip-path: none; transition: background-color 300ms ease; }
+    .menu [data-stagger], .menu.is-open [data-stagger] { opacity: 1; transform: none; transition: none; }
+  }
   .menu__bar {
     height: 65px;
     border-bottom: 1px solid rgb(255 255 255 / 0.25);
@@ -179,8 +223,8 @@ const clocks = [
   .menu__body { height: auto; min-height: 745px; } /* 810 − 65 bar */
   .menu__close {
     position: absolute;
-    right: 70px;
-    top: 21px;
+    right: 68px; /* centred on the hamburger: 64 + 30/2 = 79 from the right */
+    top: 22px; /* centre at y=33, same as the hamburger lines */
     width: 22px;
     height: 22px;
     padding: 0;

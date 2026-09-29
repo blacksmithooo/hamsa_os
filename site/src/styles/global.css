@@ -35,6 +35,8 @@
 
 *, *::before, *::after { box-sizing: border-box; }
 html, body { margin: 0; }
+/* Always reserve the scrollbar's space, so locking scroll (menu open) never shifts the layout. */
+html { scrollbar-gutter: stable; }
 body {
   background: var(--color-bg);
   color: var(--color-fg);
