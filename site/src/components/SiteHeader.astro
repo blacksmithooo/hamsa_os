@@ -237,6 +237,11 @@ const clocks = [
     height: 65px;
     border-bottom: 1px solid rgb(255 255 255 / 0.25);
   }
+  /* Run the hairline under the scrollbar gap too, without moving the logo or the X. */
+  :global(html.menu-open) .menu__bar {
+    margin-right: calc(-1 * var(--sbw, 0px));
+    padding-right: var(--sbw, 0px);
+  }
   /* Same centred 1440px column as the homepage, so the menu lines up on any screen width. */
   .menu__frame {
     position: relative;
