@@ -6,7 +6,8 @@ import { asset } from '../lib/asset';
 //   1b  image shrinks to a 1090×580 card (radius 100) on the embossed bg   (181:2692)
 //   1c  card becomes a 637×176 ring (30px image stroke), "Request a demo"   (181:2680)
 //   1d  ring becomes a 579×120 black 2px outline pill; scrim fades to white (181:2668)
-// The section pins for several screens while scroll progress drives the interpolation.
+// The section pins while you scroll. Scroll swaps the two phrases; past a set point, 1b → 1d plays as one
+// timed animation (not scrubbed), and scrolling back above that point plays it in reverse.
 ---
 <section class="flock" data-flock aria-label="Don't sacrifice privacy. Operate as one.">
   <div class="flock__stage">
@@ -42,6 +43,17 @@ import { asset } from '../lib/asset';
     const scrim = root.querySelector<HTMLElement>('[data-scrim]')!;
     const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
 
+    // The 1b → 1d transition as a timeline in ms, built from the motion durations (--dur-1…3).
+    const T_CARD = [0, 800], T_RING = [800, 1200], T_HOLE = [1200, 1400], T_PILL = [1600, 2400];
+    const T_CTA = 1400; // "Request a demo" words start once the ring is complete
+    const T_END = T_PILL[1];
+    const TRIGGER = 0.32; // scroll progress, just after "Operate as one." has settled
+    let time = reduce ? T_END : 0; // current position on the timeline
+    let target = time;
+    let last = 0;
+    let playing = false;
+    const at = (t: number, [a, b]: number[]) => hamsaEase(clamp((t - a) / (b - a)));
+
     const render = () => {
       const stage = root.firstElementChild as HTMLElement;
       const W = stage.clientWidth;
@@ -50,12 +62,11 @@ import { asset } from '../lib/asset';
       const total = root.offsetHeight - H;
       const p = reduce ? 1 : clamp(-root.getBoundingClientRect().top / total);
 
-      // Phase boundaries along the scroll.
-      const tText = seg(p, 0.14, 0.24); // phrase 1 → phrase 2
-      const tCard = seg(p, 0.34, 0.52); // full bleed → card
-      const tRing = seg(p, 0.56, 0.68); // card shrinks, still solid, into the pill shape
-      const tHole = seg(p, 0.68, 0.74); // the centre opens from the middle out, leaving the photo ring
-      const tPill = seg(p, 0.85, 0.96); // ring → outline pill
+      const tText = seg(p, 0.06, 0.2); // phrase 1 → phrase 2 (scroll-driven)
+      const tCard = at(time, T_CARD); // full bleed → card
+      const tRing = at(time, T_RING); // card shrinks, still solid, into the pill shape
+      const tHole = at(time, T_HOLE); // the centre opens from the middle out, leaving the photo ring
+      const tPill = at(time, T_PILL); // ring → outline pill
 
       const full: Box = { ...FULL, w: W / k, h: H / k };
       let b: Box;
@@ -80,14 +91,33 @@ import { asset } from '../lib/asset';
 
       lines[0].style.opacity = String((1 - tText) * (1 - tCard));
       lines[1].style.opacity = String(tText * (1 - tCard));
-      // Once the ring is complete, "Request a demo" plays in word by word (a timed animation, not tied to scroll).
-      const ctaIn = p >= 0.745; // just after the hole phase ends (its eased value can reach 1 early because of the settle)
+      // Once the ring is complete, "Request a demo" plays in word by word (CSS transition on the class).
+      const ctaIn = time >= T_CTA;
       root.classList.toggle('is-cta-in', ctaIn);
       cta.style.pointerEvents = ctaIn ? 'auto' : 'none';
       cta.style.width = `${b.w * k}px`;
       cta.style.height = `${b.h * k}px`;
       cta.style.borderColor = `rgb(0 0 0 / ${tPill})`;
       scrim.style.opacity = String(tPill);
+
+      // Crossing the trigger point starts the timeline; crossing back reverses it.
+      if (!reduce) {
+        const next = p >= TRIGGER ? T_END : 0;
+        if (next !== target) {
+          target = next;
+          if (!playing) { playing = true; last = performance.now(); requestAnimationFrame(tick); }
+        }
+      }
+    };
+
+    // Forward plays at real time; reverse is an exit, so it runs at 75% of the time (brand/motion.md).
+    const tick = (now: number) => {
+      const dt = now - last;
+      last = now;
+      time = target > time ? Math.min(target, time + dt) : Math.max(target, time - dt / 0.75);
+      render();
+      if (time !== target) requestAnimationFrame(tick);
+      else playing = false;
     };
 
     const mix = (a: Box, b: Box, t: number): Box => ({
@@ -115,7 +145,7 @@ import { asset } from '../lib/asset';
 <style define:vars={{ flock: `url(${asset('images/flock.webp')})`, emboss: `url(${asset('images/emboss-bg.webp')})`, ring: `url(${asset('images/flock-ring.webp')})` }}>
   .flock {
     position: relative;
-    height: 500vh; /* scroll distance for the whole sequence */
+    height: 350vh; /* scroll distance: phrase swap, trigger, then time to take in the pill */
   }
   .flock__stage {
     position: sticky;
