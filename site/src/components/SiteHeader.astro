@@ -373,8 +373,9 @@ const clocks = [
     .menu__close { right: 16px; }
     .menu__tagline, .menu__clocks, .menu__nav { position: static; }
     .menu__body { min-height: 0; display: flex; flex-direction: column; }
-    .menu__clocks { order: 1; } /* clocks sit under the links */
-    .menu__tagline { padding: 40px 24px 0; }
+    .menu__tagline { order: 1; } /* tagline and clocks sit under the links */
+    .menu__clocks { order: 2; }
+    .menu__tagline { padding: 16px 24px 24px; }
     .menu__nav { display: grid; grid-template-columns: 1fr; gap: 32px; padding: 32px 24px; }
     .menu__col--infrastructure { grid-row: auto; }
     .menu__col--resources { margin-top: 0; }
