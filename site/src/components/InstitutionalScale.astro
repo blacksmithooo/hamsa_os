@@ -18,8 +18,8 @@ const stats = [
   </div>
 
   <ul class="stats__tiles">
-    {stats.map((s) => (
-      <li class="tile" tabindex="0" style={`--c: ${s.color}; --solid: ${s.solid}`}>
+    {stats.map((s, i) => (
+      <li class="tile" tabindex="0" style={`--c: ${s.color}; --solid: ${s.solid}; --i: ${i}`}>
         <span class="tile__glow" aria-hidden="true"></span>
         <span class="tile__label" set:html={s.label} />
         <span class="tile__detail">
@@ -196,6 +196,20 @@ const stats = [
       pointer-events: none;
     }
     .stats.is-armed:not(.is-revealed) :is(.tile__glow, .tile__label),
+    .stats.is-armed:not(.is-revealed) .stats__note { opacity: 0; }
+  }
+
+  /* Narrow screens (tiles stacked under the headline): the tiles rise in, one after another, as the headline
+     blurs, and drop back out as it sharpens. Same trigger and duration as the blur, so the two cross over. */
+  @media (max-width: 1180px) {
+    .tile {
+      transition: opacity calc(var(--dur) * 0.75) var(--ease-hamsa-exit), transform calc(var(--dur) * 0.75) var(--ease-hamsa-exit);
+    }
+    .stats.is-armed:not(.is-revealed) .tile { opacity: 0; transform: translateY(32px) scale(0.96); }
+    .stats.is-revealed .tile {
+      transition: opacity var(--dur) var(--ease), transform var(--dur) var(--ease);
+      transition-delay: calc(var(--stagger) * 2 * var(--i));
+    }
     .stats.is-armed:not(.is-revealed) .stats__note { opacity: 0; }
   }
 
