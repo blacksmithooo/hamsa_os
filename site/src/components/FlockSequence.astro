@@ -69,8 +69,11 @@ import { asset } from '../lib/asset';
       const u = hamsaEase(time / T_END); // the one eased progress (settles just past 1)
       const tRound = win(u, 0, 0.3); // corners round up to the pill radius
       const tRingTex = win(u, 0.2, 0.5); // cross-fade to Figma's ring texture
-      const tHole = win(u, 0.35, 0.7); // the centre opens from the middle out, leaving the photo ring
-      const tOut = win(u, 0.7, 1); // photo ring thins and fades as the black outline arrives
+      // The hollowing and the ring's fade run on clock time, not on u: u moves fastest mid-motion, which made
+      // the centre open in ~160ms and read as a flash. On the clock it opens over ~660ms, fading in as it goes.
+      const t = time / T_END;
+      const tHole = win(t, 0.3, 0.85); // the centre opens from the middle out, leaving the photo ring
+      const tOut = win(t, 0.65, 1); // photo ring thins and fades as the black outline arrives
 
       const full: Box = { ...FULL, w: W / k, h: H / k };
       const w = Math.max(0, lerp(full.w, PILL.w, u));
@@ -93,7 +96,7 @@ import { asset } from '../lib/asset';
       const inset = lerp(collapsed, ringInset, tHole);
       hole.style.inset = `${inset}px`;
       hole.style.borderRadius = `${Math.max(0, r * k - inset)}px`;
-      hole.style.opacity = tHole > 0 ? '1' : '0';
+      hole.style.opacity = String(clamp(tHole * 3)); // soft reveal instead of a hard cut
       hole.style.backgroundSize = `${W}px ${H}px`; // line up with the stage background
 
       const tFade = win(u, 0, 0.25);
