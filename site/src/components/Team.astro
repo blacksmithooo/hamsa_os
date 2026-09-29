@@ -64,49 +64,100 @@ const total = String(people.length).padStart(2, '0');
     // Slot of slide k relative to the active one, wrapped into −2…3 so the strip loops.
     const slot = (k: number) => ((((k - active) % n) + n + 2) % n) - 2;
 
-    // Card that wraps to the other end of the strip: it's pulled out quickly past the screen edge in the
-    // direction of travel (exit curve, --dur-2 × 0.75), then glides in from the opposite edge to its new slot
-    // (--dur-3), landing just after the other cards have slid over. One animation, so rapid clicks can cancel it.
+    // Moving the strip by d places: most cards slide over (--dur-3, CSS transition). The d cards that wrap to the
+    // other end leave as a train, pulled quickly off-screen in the direction of travel (exit curve, 300ms), then
+    // come back in as a train from the opposite edge to their new slots (--dur-3), landing just after the slide.
+    // Everything starts from where it is on screen right now, so clicks during an animation carry on smoothly.
     const css = getComputedStyle(document.documentElement);
+    const EASE_IN = css.getPropertyValue('--ease-hamsa').trim() || 'ease-out';
+    const EASE_OUT = css.getPropertyValue('--ease-hamsa-exit').trim() || 'ease-in';
     const EXIT = 300;
     const ENTER = 800;
-    const wrap = (el: HTMLElement, now: number, to: number, dir: number) => {
-      const r = el.getBoundingClientRect();
-      const base = r.left - now; // page x of the card with no transform
-      const offLeft = -base - r.width - 40;
-      const offRight = innerWidth - base + 40;
-      const [out, back] = dir > 0 ? [offLeft, offRight] : [offRight, offLeft];
-      const total = EXIT + ENTER;
-      el.animate(
+    type Wrap = { anim: Animation; out: number; back: number; dir: number };
+    const wraps = new Map<HTMLElement, Wrap>();
+    const xNow = (el: HTMLElement) => new DOMMatrix(getComputedStyle(el).transform).m41;
+
+    // Play out → (jump) → back → to. `outFrom` lets a card already partway out finish its exit first.
+    const playWrap = (el: HTMLElement, now: number, out: number, back: number, to: number, exitMs: number, dir: number, delay = 0) => {
+      const total = exitMs + ENTER;
+      const anim = el.animate(
         [
-          { transform: `translateX(${now}px)`, easing: css.getPropertyValue('--ease-hamsa-exit').trim() || 'ease-in' },
-          { transform: `translateX(${out}px)`, offset: EXIT / total, easing: 'step-end' },
-          { transform: `translateX(${back}px)`, offset: EXIT / total + 0.0001, easing: css.getPropertyValue('--ease-hamsa').trim() || 'ease-out' },
+          { transform: `translateX(${now}px)`, easing: EASE_OUT },
+          { transform: `translateX(${out}px)`, offset: exitMs / total, easing: 'step-end' },
+          { transform: `translateX(${back}px)`, offset: exitMs / total + 0.0001, easing: EASE_IN },
           { transform: `translateX(${to}px)` },
         ],
-        { duration: total },
+        { duration: total, delay, fill: 'backwards' },
       );
+      wraps.set(el, { anim, out, back, dir });
+      anim.finished.then(() => wraps.get(el)?.anim === anim && wraps.delete(el), () => {});
+    };
+    // Slide from the current on-screen position to `to` with the normal CSS transition.
+    const slideFrom = (el: HTMLElement, now: number, to: number) => {
+      el.style.transition = 'none';
+      el.style.transform = `translateX(${now}px)`;
+      void el.offsetWidth;
+      el.style.transition = '';
+      el.style.transform = `translateX(${to}px)`;
     };
 
-    const render = (animate: boolean, dir = 0) => {
-      slides.forEach((el, k) => {
+    const render = (animate: boolean, d = 0) => {
+      const dir = Math.sign(d);
+      const state = slides.map((el, k) => {
         const s = slot(k);
-        const jump = Math.abs(s - offsets[k]) > 1; // wrapped to the other end of the strip
-        const now = new DOMMatrix(getComputedStyle(el).transform).m41; // where it is right now (may be mid-move)
-        // Cancel an earlier wrap still in flight (not the CSS slide transitions, which carry on smoothly).
-        el.getAnimations().forEach((a) => { if (!(a instanceof CSSTransition)) a.cancel(); });
-        if (animate && jump) wrap(el, now, s * STEP, dir);
-        el.style.transition = animate && !jump ? '' : 'none';
-        el.style.transform = `translateX(${s * STEP}px)`;
-        el.classList.toggle('is-active', s === 0);
-        offsets[k] = s;
+        // Wrapping = anything other than simply moving d places along the strip.
+        return { el, k, s, now: xNow(el), jump: animate && s !== offsets[k] - d, wrap: wraps.get(el) };
       });
+      // Train geometry for the cards wrapping this time, keeping their spacing.
+      const reversing = (c: (typeof state)[number]) => !!c.wrap && ((c.wrap.anim.currentTime as number) ?? 0) < EXIT && c.wrap.dir !== dir;
+      const leaving = state.filter((c) => c.jump && !reversing(c));
+      let outShift = 0;
+      let backShift = 0;
+      if (animate && leaving.length) {
+        const width = slides[0].offsetWidth;
+        const base = (c: (typeof state)[number]) => c.el.getBoundingClientRect().left - c.now; // untransformed x
+        // The card nearest the far side leads: once it's off-screen, they all are.
+        const last = leaving.reduce((a, c) => (dir > 0 ? (c.now > a.now ? c : a) : c.now < a.now ? c : a));
+        outShift = dir > 0 ? -base(last) - width - 40 - last.now : innerWidth - base(last) + 40 - last.now;
+        const first = leaving.reduce((a, c) => (dir > 0 ? (c.s < a.s ? c : a) : c.s > a.s ? c : a));
+        backShift = dir > 0 ? innerWidth - base(first) + 40 - first.s * STEP : -base(first) - width - 40 - first.s * STEP;
+      }
+
+      state.forEach(({ el, s, now, jump, wrap }) => {
+        const to = s * STEP;
+        const t = (wrap?.anim.currentTime as number | null) ?? 0;
+        wrap?.anim.cancel();
+        wraps.delete(el);
+        let played = false; // a wrap animation now draws this card; its resting transform is set underneath
+        if (!animate) {
+          el.style.transition = 'none';
+          el.style.transform = `translateX(${to}px)`;
+        } else if (jump && wrap && t < EXIT && wrap.dir !== dir) {
+          // Reversed while still leaving: it just comes back in from the side it was leaving by.
+          slideFrom(el, now, to);
+        } else if (jump) {
+          playWrap(el, now, now + outShift, to + backShift, to, EXIT, dir);
+          played = true;
+        } else if (wrap && t < EXIT) {
+          // Still on its way out from an earlier click: finish leaving, then come in to the new slot.
+          playWrap(el, now, wrap.out, wrap.back, to, Math.max(60, EXIT - t), wrap.dir);
+          played = true;
+        } else {
+          slideFrom(el, now, to);
+        }
+        if (played) {
+          el.style.transition = 'none';
+          el.style.transform = `translateX(${to}px)`;
+        }
+        el.classList.toggle('is-active', s === 0);
+      });
+      state.forEach(({ k, s }) => (offsets[k] = s));
       persons.forEach((el, k) => (el.hidden = k !== active));
       current.textContent = String(active + 1).padStart(2, '0');
     };
     const go = (d: number) => {
       active = (active + d + n) % n;
-      render(!matchMedia('(prefers-reduced-motion: reduce)').matches, Math.sign(d));
+      render(!matchMedia('(prefers-reduced-motion: reduce)').matches, d);
     };
     root.querySelector('[data-prev]')!.addEventListener('click', () => go(-1));
     root.querySelector('[data-next]')!.addEventListener('click', () => go(1));
