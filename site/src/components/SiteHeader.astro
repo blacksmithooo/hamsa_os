@@ -104,7 +104,6 @@ const clocks = [
         menu.classList.remove('is-closing');
         menu.style.setProperty('--menu-bg', menu.dataset.firstShade!);
         menu.scrollTop = 0;
-        links.forEach((a) => a.classList.remove('is-active'));
         root.classList.remove('menu-open');
         window.lenis?.start(); // only once the menu has fully closed, together with the scrollbar returning
       }, 300); // = --dur-2 × 0.75, the exit swipe
@@ -125,15 +124,14 @@ const clocks = [
     a.addEventListener('focus', set);
   });
 
-  // Touch screens can't hover, so there the menu's scroll position picks the link instead: scrolling
-  // from top to bottom steps through the links (and their shades) in order.
+  // Touch screens can't hover, so there the menu's scroll position picks the background shade instead:
+  // scrolling from top to bottom steps through the links' shades in order (the links themselves stay still).
   const touch = matchMedia('(hover: none)');
   menu.addEventListener('scroll', () => {
     if (!touch.matches) return;
     const range = menu.scrollHeight - menu.clientHeight;
     if (range <= 0) return;
     const i = Math.round((menu.scrollTop / range) * (links.length - 1));
-    links.forEach((a, j) => a.classList.toggle('is-active', j === i));
     menu.style.setProperty('--menu-bg', links[i].style.getPropertyValue('--shade'));
   }, { passive: true });
 
@@ -360,11 +358,9 @@ const clocks = [
   }
   .menu__col a > span:last-child { display: block; transition: transform var(--dur-1) var(--ease-hamsa); }
   .menu__col a:hover > span:last-child,
-  .menu__col a:focus-visible > span:last-child,
-  .menu__col a.is-active > span:last-child { transform: translateX(30px); }
+  .menu__col a:focus-visible > span:last-child { transform: translateX(30px); }
   .menu__col a:hover .menu__num,
-  .menu__col a:focus-visible .menu__num,
-  .menu__col a.is-active .menu__num { opacity: 1; }
+  .menu__col a:focus-visible .menu__num { opacity: 1; }
   .menu__col a:focus-visible { outline: none; }
 
   @media (max-width: 1100px) {
