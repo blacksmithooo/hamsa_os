@@ -34,20 +34,28 @@ const stats = [
 </section>
 
 <script>
-  // Arm the "a" state only when JS runs (no-JS visitors see the revealed tiles),
-  // then reveal once the section is mostly on screen.
+  // Arm the "a" state only when JS runs (no-JS visitors see the revealed tiles), reveal when the section
+  // comes into view, and undo it when scrolling back up above it (so the headline sharpens again).
+  // Desktop: the section is one screen tall, so reveal once 60% of it is visible. Narrow screens: the section
+  // is taller than the screen, so reveal once the tiles pass 70% of the way up the screen.
+  const narrow = matchMedia('(max-width: 1180px)');
   document.querySelectorAll<HTMLElement>('[data-stats]').forEach((el) => {
     el.classList.add('is-armed');
-    const io = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          el.classList.add('is-revealed');
-          io.disconnect();
-        }
-      },
-      { threshold: 0.6 },
-    );
-    io.observe(el);
+    let io: IntersectionObserver | undefined;
+    const watch = () => {
+      io?.disconnect();
+      const target = narrow.matches ? el.querySelector<HTMLElement>('.stats__tiles')! : el;
+      io = new IntersectionObserver(
+        ([entry]) => {
+          if (entry.isIntersecting) el.classList.add('is-revealed');
+          else if (entry.boundingClientRect.top > 0) el.classList.remove('is-revealed'); // back above it, not past it
+        },
+        narrow.matches ? { rootMargin: '0px 0px -30% 0px' } : { threshold: 0.6 },
+      );
+      io.observe(target);
+    };
+    watch();
+    narrow.addEventListener('change', watch);
   });
 </script>
 
@@ -206,8 +214,6 @@ const stats = [
       gap: 16px;
     }
     .stats__note { position: static; margin-top: 48px; font-size: 16px; line-height: 1.3; }
-    /* The tiles sit below the headline here rather than over it, so the headline stays sharp. */
-    .stats .stats__copy { filter: none; opacity: 1; }
     .stats__tiles { margin-top: 40px; }
   }
 
