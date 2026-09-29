@@ -16,7 +16,7 @@ import { asset } from '../lib/asset';
     </div>
     <p class="flock__line" data-line="0">Don't sacrifice privacy.</p>
     <p class="flock__line" data-line="1">Operate as one.</p>
-    <a class="flock__cta" href="#contact" data-cta>Request a demo</a>
+    <a class="flock__cta" href="#contact" data-cta aria-label="Request a demo"><span class="flock__words" aria-hidden="true">{['Request', 'a', 'demo'].map((w, i) => <span class="flock__word"><span style={`--i: ${i}`}>{w}</span></span>)}</span></a>
     <div class="flock__scrim" data-scrim aria-hidden="true"></div>
   </div>
 </section>
@@ -53,30 +53,37 @@ import { asset } from '../lib/asset';
       // Phase boundaries along the scroll.
       const tText = seg(p, 0.14, 0.24); // phrase 1 → phrase 2
       const tCard = seg(p, 0.34, 0.52); // full bleed → card
-      const tRing = seg(p, 0.58, 0.74); // card → ring
-      const tPill = seg(p, 0.8, 0.94); // ring → outline pill
+      const tRing = seg(p, 0.56, 0.68); // card shrinks, still solid, into the pill shape
+      const tHole = seg(p, 0.68, 0.74); // the centre opens from the middle out, leaving the photo ring
+      const tPill = seg(p, 0.85, 0.96); // ring → outline pill
 
       const full: Box = { ...FULL, w: W / k, h: H / k };
       let b: Box;
       if (tRing === 0) b = mix(full, CARD, tCard);
       else if (tPill === 0) b = mix(CARD, RING, tRing);
       else b = mix(RING, PILL, tPill);
+      // (b.ring is ignored below: the hole's own phase draws the ring.)
 
       media.style.width = `${b.w * k}px`;
       media.style.height = `${b.h * k}px`;
       media.style.borderRadius = `${b.r * k}px`;
       media.style.opacity = String(1 - tPill);
       media.style.setProperty('--ring-o', String(tRing)); // Figma uses a separate texture for the ring
-      const inset = b.ring * k;
+      // The hole grows from a sliver in the middle to the final 30px ring, so the photo never turns see-through.
+      const ringInset = RING.ring * k * (tPill > 0 ? 1 - tPill : 1);
+      const collapsed = (Math.min(b.w, b.h) * k) / 2;
+      const inset = tPill > 0 ? ringInset : collapsed + (ringInset - collapsed) * tHole;
       hole.style.inset = `${inset}px`;
       hole.style.borderRadius = `${Math.max(0, b.r * k - inset)}px`;
-      hole.style.opacity = String(tRing);
+      hole.style.opacity = tHole > 0 ? '1' : '0';
       hole.style.backgroundSize = `${W}px ${H}px`; // line up with the stage background
 
       lines[0].style.opacity = String((1 - tText) * (1 - tCard));
       lines[1].style.opacity = String(tText * (1 - tCard));
-      cta.style.opacity = String(tRing);
-      cta.style.pointerEvents = tRing > 0.5 ? 'auto' : 'none';
+      // Once the ring is complete, "Request a demo" plays in word by word (a timed animation, not tied to scroll).
+      const ctaIn = p >= 0.745; // just after the hole phase ends (its eased value can reach 1 early because of the settle)
+      root.classList.toggle('is-cta-in', ctaIn);
+      cta.style.pointerEvents = ctaIn ? 'auto' : 'none';
       cta.style.width = `${b.w * k}px`;
       cta.style.height = `${b.h * k}px`;
       cta.style.borderColor = `rgb(0 0 0 / ${tPill})`;
@@ -167,8 +174,22 @@ import { asset } from '../lib/asset';
     font-size: 48px;
     font-weight: 500;
     line-height: 48px;
-    opacity: 0;
     transition: background-color var(--dur-1) var(--ease-hamsa), color var(--dur-1) var(--ease-hamsa);
+  }
+  .flock__words { display: inline-flex; gap: 0.25em; }
+  .flock__word { display: inline-block; overflow: hidden; padding-bottom: 0.08em; margin-bottom: -0.08em; }
+  .flock__word > span {
+    display: inline-block;
+    transform: translateY(110%);
+    transition: transform calc(var(--dur-2) * 0.75) var(--ease-hamsa-exit);
+  }
+  /* Words slide up into the pill one at a time (3 × --stagger apart so each word reads on its own). */
+  .flock.is-cta-in .flock__word > span {
+    transform: none;
+    transition: transform var(--dur-2) var(--ease-hamsa) calc(var(--stagger) * 3 * var(--i));
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .flock__word > span, .flock.is-cta-in .flock__word > span { transition: none; }
   }
   .flock__cta:hover, .flock__cta:focus-visible { background: rgb(0 0 0 / 0.85); color: #fff; }
   .flock__scrim {
