@@ -37,7 +37,7 @@ const clocks = [
   </div>
 </header>
 
-<div class="menu" id="site-menu" hidden data-menu data-first-shade={shades[0]} style={`--menu-bg: ${shades[0]}`}>
+<div class="menu" id="site-menu" hidden data-menu data-lenis-prevent data-first-shade={shades[0]} style={`--menu-bg: ${shades[0]}`}>
   <div class="menu__bar"><div class="menu__frame">
     <a class="menu__logo" href={asset('')} aria-label="Hamsa home">
       <img src={asset('images/icons/hamsa-logo-white.svg')} alt="Hamsa" width="143" height="62" />
@@ -103,6 +103,8 @@ const clocks = [
         menu.hidden = true;
         menu.classList.remove('is-closing');
         menu.style.setProperty('--menu-bg', menu.dataset.firstShade!);
+        menu.scrollTop = 0;
+        links.forEach((a) => a.classList.remove('is-active'));
         root.classList.remove('menu-open');
         window.lenis?.start(); // only once the menu has fully closed, together with the scrollbar returning
       }, 300); // = --dur-2 × 0.75, the exit swipe
@@ -116,11 +118,24 @@ const clocks = [
   });
 
   // Background follows the hovered / focused link.
-  menu.querySelectorAll<HTMLAnchorElement>('.menu__nav a').forEach((a) => {
+  const links = [...menu.querySelectorAll<HTMLAnchorElement>('.menu__nav a')];
+  links.forEach((a) => {
     const set = () => menu.style.setProperty('--menu-bg', a.style.getPropertyValue('--shade'));
     a.addEventListener('mouseenter', set);
     a.addEventListener('focus', set);
   });
+
+  // Touch screens can't hover, so there the menu's scroll position picks the link instead: scrolling
+  // from top to bottom steps through the links (and their shades) in order.
+  const touch = matchMedia('(hover: none)');
+  menu.addEventListener('scroll', () => {
+    if (!touch.matches) return;
+    const range = menu.scrollHeight - menu.clientHeight;
+    if (range <= 0) return;
+    const i = Math.round((menu.scrollTop / range) * (links.length - 1));
+    links.forEach((a, j) => a.classList.toggle('is-active', j === i));
+    menu.style.setProperty('--menu-bg', links[i].style.getPropertyValue('--shade'));
+  }, { passive: true });
 
   // Fold the nav away while the footer (which repeats the logo and links) is on screen.
   const header = document.querySelector<HTMLElement>('[data-site-header]')!;
@@ -203,6 +218,7 @@ const clocks = [
     inset: 0;
     z-index: 20;
     overflow-y: auto;
+    overscroll-behavior: contain; /* don't hand the scroll on to the page behind */
     background: var(--menu-bg);
     color: #fff;
     transition: background-color var(--dur-2) var(--ease-hamsa);
@@ -344,9 +360,11 @@ const clocks = [
   }
   .menu__col a > span:last-child { display: block; transition: transform var(--dur-1) var(--ease-hamsa); }
   .menu__col a:hover > span:last-child,
-  .menu__col a:focus-visible > span:last-child { transform: translateX(30px); }
+  .menu__col a:focus-visible > span:last-child,
+  .menu__col a.is-active > span:last-child { transform: translateX(30px); }
   .menu__col a:hover .menu__num,
-  .menu__col a:focus-visible .menu__num { opacity: 1; }
+  .menu__col a:focus-visible .menu__num,
+  .menu__col a.is-active .menu__num { opacity: 1; }
   .menu__col a:focus-visible { outline: none; }
 
   @media (max-width: 1100px) {
@@ -354,13 +372,14 @@ const clocks = [
     .site-header__menu { right: 16px; }
     .menu__close { right: 16px; }
     .menu__tagline, .menu__clocks, .menu__nav { position: static; }
-    .menu__body { min-height: 0; }
+    .menu__body { min-height: 0; display: flex; flex-direction: column; }
+    .menu__clocks { order: 1; } /* clocks sit under the links */
     .menu__tagline { padding: 40px 24px 0; }
     .menu__nav { display: grid; grid-template-columns: 1fr; gap: 32px; padding: 32px 24px; }
     .menu__col--infrastructure { grid-row: auto; }
     .menu__col--resources { margin-top: 0; }
     .menu__col a { font-size: 32px; line-height: 30px; }
-    .menu__clocks { padding: 0 24px 40px; }
+    .menu__clocks { padding: 8px 24px 48px; }
   }
 
   /* Older Safari (15–17) only understands the prefixed property. */
