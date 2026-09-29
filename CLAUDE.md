@@ -8,6 +8,8 @@ This repo is Hamsa's company OS: brand, messaging and the projects built from th
 - For anything visual, follow `brand/guidelines.md` and look at `brand/reference/` first. Hamsa is rebranding: the
   Figma file is the only source for the look. Never reuse colours, fonts, layouts, imagery or headlines from the old
   hamsa.com; it may only be used for background facts about the company.
+- For anything animated, use only the Murmuration curve and the durations in `brand/motion.md` (CSS tokens
+  `--ease-hamsa`, `--ease-hamsa-exit`, `--dur-1…4`, `--stagger`); never hand-pick easing values.
 - Don't present missing content (e.g. team bios marked "not written yet") as real; flag it instead.
 - Update `brand/` or `messaging/` first when rules or copy change, then the projects that use them.
 

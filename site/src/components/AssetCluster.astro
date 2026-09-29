@@ -76,12 +76,12 @@ const circles = [
     font-weight: 500;
     line-height: 20.59px;
     text-align: center;
-    transition: transform 1100ms cubic-bezier(0.22, 1, 0.36, 1), filter 1100ms ease;
+    transition: transform var(--dur-4) var(--ease-hamsa), filter var(--dur-4) var(--ease-hamsa);
   }
   /* State 2a: the two arriving circles, before the section is revealed. */
   .assets.is-armed:not(.is-revealed) .circle--near { transform: scale(0.5); filter: blur(2px); }
   .assets.is-armed:not(.is-revealed) .circle--far { transform: scale(0.25); filter: blur(5px); }
-  .circle--far { transition-delay: 150ms; }
+  .circle--far { transition-delay: calc(var(--stagger) * 5); }
 
   @media (prefers-reduced-motion: reduce) {
     .circle { transition: none; }

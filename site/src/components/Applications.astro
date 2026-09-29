@@ -107,7 +107,7 @@ const columns = [
     height: 344px;
   }
   .app {
-    --ease: cubic-bezier(0.22, 1, 0.36, 1);
+    --ease: var(--ease-hamsa);
     position: relative;
     height: 162px;
     overflow: hidden;
@@ -116,7 +116,7 @@ const columns = [
     background: rgb(255 255 255 / 0.05);
     backdrop-filter: blur(25px);
     cursor: default;
-    transition: height 450ms var(--ease), background-color 300ms ease;
+    transition: height var(--dur-2) var(--ease), background-color var(--dur-2) var(--ease);
   }
   .apps__col:has(.app:hover, .app:focus-visible) .app { height: 123px; }
   .apps__col:has(.app:hover, .app:focus-visible) .app:is(:hover, :focus-visible) { height: 201px; background: var(--c); outline: none; }
@@ -129,7 +129,7 @@ const columns = [
     font-size: 24px;
     font-weight: 600;
     line-height: 24px;
-    transition: color 300ms ease;
+    transition: color var(--dur-1) var(--ease-hamsa);
   }
   .app__plus {
     position: absolute;
@@ -140,9 +140,9 @@ const columns = [
     background:
       linear-gradient(var(--tint), var(--tint)) center / 31px 1px no-repeat,
       linear-gradient(var(--tint), var(--tint)) center / 1px 31px no-repeat;
-    transition: opacity 200ms ease;
+    transition: opacity var(--dur-1) var(--ease-hamsa);
   }
-  .app__more { opacity: 0; transition: opacity 250ms ease; }
+  .app__more { opacity: 0; transition: opacity var(--dur-1) var(--ease-hamsa); }
   .app__rule {
     position: absolute;
     left: 32px;
@@ -164,7 +164,7 @@ const columns = [
   .app__text strong { font-weight: 600; }
   .app:hover .app__title, .app:focus-visible .app__title { color: #fff; }
   .app:hover .app__plus, .app:focus-visible .app__plus { opacity: 0; }
-  .app:hover .app__more, .app:focus-visible .app__more { opacity: 1; transition-delay: 120ms; }
+  .app:hover .app__more, .app:focus-visible .app__more { opacity: 1; transition-delay: calc(var(--stagger) * 4); }
 
   .apps__cta {
     position: absolute;

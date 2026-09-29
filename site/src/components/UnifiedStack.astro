@@ -81,7 +81,7 @@ const layers = [
 
 <style>
   .stack {
-    --ease: cubic-bezier(0.22, 1, 0.36, 1);
+    --ease: var(--ease-hamsa);
     position: relative;
     max-width: var(--frame);
     height: 1340px;
@@ -105,7 +105,7 @@ const layers = [
     left: 50%;
     border-radius: 20px;
     transform: translateX(-50%);
-    transition: width 700ms var(--ease), height 700ms var(--ease), background 700ms ease;
+    transition: width var(--dur-3) var(--ease), height var(--dur-3) var(--ease), background var(--dur-3) var(--ease);
   }
   .stack[data-step='0'] .stack__panel { width: 644px; height: 143px; background: linear-gradient(128.9deg, #3b3b61 0px, #d2506a 295.6px, #ffc34a 591.1px); }
   .stack[data-step='1'] .stack__panel { width: 1090px; height: 204px; background: linear-gradient(133.7deg, #3b3b61 0px, #d2506a 464.4px, #ffc34a 928.7px); }
@@ -134,7 +134,7 @@ const layers = [
     background: #fff;
     box-shadow: 0 0 50px rgb(0 0 0 / 0.15);
     text-align: left;
-    transition: opacity 600ms var(--ease), transform 700ms var(--ease);
+    transition: opacity var(--dur-3) var(--ease), transform var(--dur-3) var(--ease);
   }
   .stack[data-step='0'] .layer,
   .stack[data-step='1'] .layer:nth-child(n + 2),
@@ -142,7 +142,7 @@ const layers = [
   .stack[data-step='0'] .stack__arrows,
   .stack[data-step='1'] .stack__arrows,
   .stack[data-step='2'] .stack__arrows:last-of-type { opacity: 0; }
-  .stack__arrows { position: absolute; left: 708px; transition: opacity 400ms ease; }
+  .stack__arrows { position: absolute; left: 708px; transition: opacity var(--dur-2) var(--ease-hamsa); }
 
   .layer__title {
     position: absolute;

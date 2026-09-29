@@ -76,10 +76,10 @@ const clocks = [
   const openBtn = document.querySelector<HTMLButtonElement>('[data-menu-open]')!;
   const closeBtn = document.querySelector<HTMLButtonElement>('[data-menu-close]')!;
 
-  // Open: diagonal colour swipe from the menu button's corner (500ms), then the items
-  // drop in one by one (25ms apart). Close: the swipe runs back, faster.
+  // Open: diagonal colour swipe from the menu button's corner (--dur-2), then the items drop in
+  // one by one (--stagger apart). Close: the swipe runs back on the exit curve, at 75% of the time.
   const staggered = [...menu.querySelectorAll<HTMLElement>('[data-stagger]')];
-  staggered.forEach((el, i) => el.style.setProperty('--d', `${160 + i * 25}ms`));
+  staggered.forEach((el, i) => el.style.setProperty('--d', `calc(var(--dur-2) * 0.4 + var(--stagger) * ${i})`));
   let closeTimer = 0;
 
   const setOpen = (open: boolean) => {
@@ -102,7 +102,7 @@ const clocks = [
         menu.classList.remove('is-closing');
         menu.style.setProperty('--menu-bg', menu.dataset.firstShade!);
         root.classList.remove('menu-open');
-      }, 320);
+      }, 300); // = --dur-2 × 0.75, the exit swipe
       openBtn.focus({ preventScroll: true });
     }
   };
@@ -147,10 +147,12 @@ const clocks = [
     background: rgb(255 255 255 / 0.05);
     backdrop-filter: blur(7.5px); /* Figma background blur 15 */
     border-bottom: 1px solid rgb(255 255 255 / 0.25);
-    transition: transform 450ms cubic-bezier(0.22, 1, 0.36, 1);
+    transition: transform var(--dur-2) var(--ease-hamsa-exit);
   }
   /* Folded away over the footer; comes back if someone tabs to it. */
   .site-header.is-folded:not(:focus-within) { transform: translateY(-100%); }
+  /* Folding away is an exit (mirror curve); coming back is an entrance. */
+  .site-header:not(.is-folded) { transition-timing-function: var(--ease-hamsa); }
   :global(html.menu-open) .site-header,
   :global(html.menu-open) .menu { padding-right: var(--sbw, 0px); }
   @media (prefers-reduced-motion: reduce) {
@@ -200,31 +202,31 @@ const clocks = [
     overflow-y: auto;
     background: var(--menu-bg);
     color: #fff;
-    transition: background-color 300ms ease;
+    transition: background-color var(--dur-2) var(--ease-hamsa);
   }
   .menu[hidden] { display: none; }
 
   /* Diagonal swipe: a triangle anchored at the top-right corner whose long edge sweeps across. */
   .menu {
     clip-path: polygon(100% 0, 100% 0, 100% 0);
-    transition: background-color 300ms ease, clip-path 320ms cubic-bezier(0.7, 0, 0.84, 0);
+    transition: background-color var(--dur-2) var(--ease-hamsa), clip-path calc(var(--dur-2) * 0.75) var(--ease-hamsa-exit);
   }
   .menu.is-open {
     clip-path: polygon(100% 0, -130% 0, 100% 230%);
-    transition: background-color 300ms ease, clip-path 500ms cubic-bezier(0.16, 1, 0.3, 1);
+    transition: background-color var(--dur-2) var(--ease-hamsa), clip-path var(--dur-2) var(--ease-hamsa);
   }
   .menu [data-stagger] {
     opacity: 0;
     transform: translateY(14px);
-    transition: opacity 120ms ease, transform 120ms ease;
+    transition: opacity calc(var(--dur-1) * 0.75) var(--ease-hamsa-exit), transform calc(var(--dur-1) * 0.75) var(--ease-hamsa-exit);
   }
   .menu.is-open [data-stagger] {
     opacity: 1;
     transform: none;
-    transition: opacity 260ms ease var(--d), transform 320ms cubic-bezier(0.16, 1, 0.3, 1) var(--d);
+    transition: opacity var(--dur-2) var(--ease-hamsa) var(--d), transform var(--dur-2) var(--ease-hamsa) var(--d);
   }
   @media (prefers-reduced-motion: reduce) {
-    .menu, .menu.is-open { clip-path: none; transition: background-color 300ms ease; }
+    .menu, .menu.is-open { clip-path: none; transition: background-color var(--dur-2) var(--ease-hamsa); }
     .menu [data-stagger], .menu.is-open [data-stagger] { opacity: 1; transform: none; transition: none; }
     .menu__close::before, .menu__close::after { transition: none !important; }
   }
@@ -261,14 +263,14 @@ const clocks = [
     width: 30px;
     height: 2px;
     background: #fff;
-    transition: top 140ms cubic-bezier(0.4, 0, 0.2, 1) 110ms, transform 140ms cubic-bezier(0.4, 0, 0.2, 1);
+    transition: top calc(var(--dur-1) * 0.75) var(--ease-hamsa-exit) calc(var(--dur-1) * 0.6), transform calc(var(--dur-1) * 0.75) var(--ease-hamsa-exit);
   }
   .menu__close::before { top: 7px; }
   .menu__close::after { top: 21px; }
   .menu.is-open .menu__close::before,
   .menu.is-open .menu__close::after {
     top: 14px;
-    transition: top 160ms cubic-bezier(0.4, 0, 0.2, 1) 60ms, transform 260ms cubic-bezier(0.34, 1.4, 0.64, 1) 200ms;
+    transition: top var(--dur-1) var(--ease-hamsa) calc(var(--stagger) * 2), transform var(--dur-2) var(--ease-hamsa) calc(var(--stagger) * 6);
   }
   .menu.is-open .menu__close::before { transform: rotate(45deg); }
   .menu.is-open .menu__close::after { transform: rotate(-45deg); }
@@ -320,7 +322,7 @@ const clocks = [
     font-weight: 500;
     line-height: 41.4px;
     letter-spacing: -0.46px;
-    transition: transform 250ms ease;
+    transition: transform var(--dur-1) var(--ease-hamsa);
   }
   .menu__num {
     position: absolute;
@@ -330,9 +332,9 @@ const clocks = [
     font-weight: 600;
     line-height: 14px;
     opacity: 0;
-    transition: opacity 200ms ease;
+    transition: opacity var(--dur-1) var(--ease-hamsa);
   }
-  .menu__col a > span:last-child { display: block; transition: transform 250ms ease; }
+  .menu__col a > span:last-child { display: block; transition: transform var(--dur-1) var(--ease-hamsa); }
   .menu__col a:hover > span:last-child,
   .menu__col a:focus-visible > span:last-child { transform: translateX(30px); }
   .menu__col a:hover .menu__num,

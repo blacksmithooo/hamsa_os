@@ -312,12 +312,14 @@ Five values only:
 - **Portraits:** head and shoulders, centred, on a plain mid-grey backdrop, soft even light, 2:3 portrait crop, 10px corners.
 - **Embossed motif:** the hamsa mark embossed in light grey (like pressed paper) as a background texture.
 
-## 8. Motion (Observed from the design's duplicate states)
+## 8. Motion
 
-- Things **assemble and settle**: bars grow into tiles, circles grow into the cluster, cards stack one by one.
-- Reveals are triggered by scrolling; hovering fills a tile with its colour and shows detail.
-- Headlines step back (blur and fade to 30%) when content arrives in front of them.
-- Pace: quick and eased out (roughly 0.4–0.9s), never bouncy or playful.
+Hamsa has one ownable easing curve, **the Murmuration curve** (gather, sweep, settle), and a strict set of durations.
+**Read [`motion.md`](motion.md) before animating anything.**
+
+What the design itself shows (Observed): things **assemble and settle** (bars grow into tiles, circles grow into the
+cluster, cards stack one by one); reveals are triggered by scrolling; hovering fills a tile with its colour; headlines
+step back (blur and fade to 30%) when content arrives in front of them.
 
 ## 9. Voice cues in the design
 
