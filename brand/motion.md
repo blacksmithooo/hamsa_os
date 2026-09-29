@@ -30,8 +30,16 @@ distinct.
 4. **Stagger by 30ms** (`--stagger`) when a group arrives one by one, in reading order.
 5. **Scroll-driven animation** (where the scroll position drives the motion) maps each phase through the same curve
    (`hamsaEase()` in `site/src/lib/motion.ts`).
-6. **Only one exception:** continuous loops, such as the scrolling client logos, run at constant speed (linear).
+6. **Exceptions:** continuous loops, such as the scrolling client logos, run at constant speed (linear); and page
+   scrolling uses its own smoothing (below), since it follows the visitor's hand rather than playing an animation.
 7. **Reduced motion:** when someone has asked their device for less motion, skip movement and show the end state.
+
+## Scroll feel
+
+Page scrolling has a light drag, so the page glides and settles rather than jumping: [Lenis](https://github.com/darkroomengineering/lenis)
+with `lerp: 0.1` (each frame the page covers 10% of the remaining distance; a flick settles in about one second).
+Mouse wheel and trackpad only; touch scrolling stays native. Turned off for reduced motion, and paused while the menu
+is open. Implemented in `site/src/lib/smooth-scroll.ts`.
 
 ## Values
 

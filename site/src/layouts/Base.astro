@@ -27,5 +27,9 @@ const { title = 'Hamsa – Powering the Finternet', description = 'Hamsa builds 
   </head>
   <body>
     <slot />
+    <script>
+      import { startSmoothScroll } from '../lib/smooth-scroll';
+      startSmoothScroll();
+    </script>
   </body>
 </html>

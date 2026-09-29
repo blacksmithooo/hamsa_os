@@ -86,6 +86,9 @@ const clocks = [
     clearTimeout(closeTimer);
     openBtn.setAttribute('aria-expanded', String(open));
     const root = document.documentElement;
+    // Pause smooth scrolling while the menu is open, so the wheel doesn't scroll the page behind it.
+    if (open) window.lenis?.stop();
+    else window.lenis?.start();
     if (open) {
       root.style.setProperty('--sbw', `${innerWidth - root.clientWidth}px`);
       root.classList.add('menu-open');
