@@ -1,0 +1,64 @@
+---
+// Figma: "Global Nav Header" (181:3004) — 1440×65, translucent white with background blur.
+---
+<header class="site-header">
+  <div class="site-header__inner">
+    <a class="site-header__logo" href="/" aria-label="Hamsa home">
+      <img src="/images/hamsa-logo.svg" alt="Hamsa" width="143" height="62" />
+    </a>
+    <button class="site-header__menu" type="button" aria-label="Open menu">
+      <span></span><span></span>
+    </button>
+  </div>
+</header>
+
+<style>
+  .site-header {
+    position: fixed;
+    inset: 0 0 auto;
+    z-index: 10;
+    height: 65px;
+    background: rgb(255 255 255 / 0.05);
+    backdrop-filter: blur(7.5px); /* Figma background blur 15 */
+    -webkit-backdrop-filter: blur(7.5px);
+    border-bottom: 1px solid rgb(255 255 255 / 0.25);
+  }
+  .site-header__inner {
+    position: relative;
+    max-width: var(--frame);
+    height: 100%;
+    margin: 0 auto;
+  }
+  .site-header__logo {
+    position: absolute;
+    left: 48px;
+    top: 2px;
+  }
+  .site-header__logo img { width: 142.3px; height: auto; }
+  .site-header__menu {
+    position: absolute;
+    right: 64px;
+    top: 18px;
+    width: 30px;
+    height: 30px;
+    padding: 0;
+    border: 0;
+    background: none;
+    cursor: pointer;
+  }
+  /* Two 2px black lines, 14px apart (Figma y=26 and y=40). */
+  .site-header__menu span {
+    position: absolute;
+    left: 0;
+    width: 30px;
+    height: 2px;
+    background: #000;
+  }
+  .site-header__menu span:first-child { top: 7px; }
+  .site-header__menu span:last-child { top: 21px; }
+
+  @media (max-width: 767px) {
+    .site-header__logo { left: 8px; }
+    .site-header__menu { right: 16px; }
+  }
+</style>

@@ -1,0 +1,210 @@
+---
+// Figma: "Module 5" (181:1013). Built from state "a"; states "b"/"c" define the reveal + hover:
+//   a — headline + five thin grey bars (199×24)
+//   b — bars grow into 199×199 tiles, headline blurs and fades to 30%, footnote appears
+//   hover — tile fills with its solid colour and shows the figure
+const stats = [
+  { label: 'Assets', value: '$400B<br />to $1T', color: 'var(--stat-1)', solid: 'var(--stat-1)' },
+  { label: 'Positions', value: '19M', color: 'var(--stat-2)', solid: 'var(--stat-2)' },
+  { label: 'Fund<br />companies', value: '130+', color: 'var(--stat-3)', solid: 'var(--stat-3)' },
+  { label: 'Forecasted<br />operating<br />cost savings', value: '$100M+', color: 'var(--stat-4)', solid: 'var(--stat-4)' },
+  { label: 'Forecasted<br />incremental<br />revenue', value: '$500M+', color: 'var(--stat-5)', solid: 'var(--stat-5-solid)' },
+];
+---
+<section class="stats" data-stats>
+  <div class="stats__copy">
+    <p class="stats__eyebrow">Institutional scale</p>
+    <h2 class="stats__title">Operate at<br />institutional scale.</h2>
+  </div>
+
+  <ul class="stats__tiles">
+    {stats.map((s) => (
+      <li class="tile" tabindex="0" style={`--c: ${s.color}; --solid: ${s.solid}`}>
+        <span class="tile__glow" aria-hidden="true"></span>
+        <span class="tile__label" set:html={s.label} />
+        <span class="tile__detail">
+          <span class="tile__value" set:html={s.value} />
+          <span class="tile__caption" set:html={s.label} />
+        </span>
+      </li>
+    ))}
+  </ul>
+
+  <p class="stats__note">Business-impact figures are ten-year forecasts provided by a Tier 1 brokerage institution</p>
+</section>
+
+<script>
+  // Arm the "a" state only when JS runs (no-JS visitors see the revealed tiles),
+  // then reveal once the section is mostly on screen.
+  document.querySelectorAll<HTMLElement>('[data-stats]').forEach((el) => {
+    el.classList.add('is-armed');
+    const io = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          el.classList.add('is-revealed');
+          io.disconnect();
+        }
+      },
+      { threshold: 0.6 },
+    );
+    io.observe(el);
+  });
+</script>
+
+<style>
+  .stats {
+    --ease: cubic-bezier(0.22, 1, 0.36, 1);
+    --dur: 900ms;
+    position: relative;
+    max-width: var(--frame);
+    height: 671px;
+    margin: 0 auto;
+    background: #fff;
+    text-align: center;
+  }
+
+  .stats__copy {
+    padding-top: 133px;
+    transition: filter var(--dur) var(--ease), opacity var(--dur) var(--ease);
+  }
+  .stats__eyebrow {
+    font-size: 14px;
+    font-weight: 600;
+    line-height: 13.3px; /* 95% */
+    letter-spacing: 2.8px;
+    text-transform: uppercase;
+  }
+  .stats__title {
+    margin-top: 23.7px; /* Figma: title top (170) − eyebrow top (133) − 13.3 */
+    font-size: 116px;
+    font-weight: 500;
+    line-height: 98.6px; /* 85% */
+  }
+
+  .stats__tiles {
+    position: absolute;
+    left: 50%;
+    top: 260px;
+    display: grid;
+    grid-template-columns: repeat(5, 199px);
+    gap: 24px;
+    width: 1091px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    transform: translateX(-50%);
+  }
+
+  .tile {
+    position: relative;
+    height: 199px;
+    overflow: hidden;
+    border-radius: var(--radius-tile);
+    background: var(--color-tile);
+    outline-offset: 4px;
+    transition: height var(--dur) var(--ease), margin-top var(--dur) var(--ease);
+  }
+  .tile__glow {
+    position: absolute;
+    left: 26px;
+    top: 177px;
+    width: 151px;
+    height: 247px;
+    border-radius: 50%;
+    background: var(--c);
+    filter: blur(75px); /* Figma layer blur 150 */
+    transition: opacity var(--dur) var(--ease);
+  }
+  .tile__label {
+    position: absolute;
+    inset: 0 0 auto;
+    height: 190px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--c);
+    font-size: 18px;
+    font-weight: 600;
+    line-height: 18px;
+    letter-spacing: 1.8px;
+    text-transform: uppercase;
+    transition: opacity var(--dur) var(--ease);
+  }
+
+  /* Hover / focus state: solid tile with the figure. */
+  .tile__detail {
+    position: absolute;
+    inset: 0;
+    background: var(--solid);
+    color: #fff;
+    opacity: 0;
+    transition: opacity 250ms ease;
+  }
+  .tile__value {
+    position: absolute;
+    inset: auto 0 93px; /* bottom edge at y=106 */
+    font-size: 52px;
+    font-weight: 500;
+    line-height: 52px;
+    letter-spacing: -0.52px;
+  }
+  .tile__caption {
+    position: absolute;
+    inset: auto 0 20px;
+    font-size: 14px;
+    font-weight: 600;
+    line-height: 14px;
+    letter-spacing: 1.4px;
+    text-transform: uppercase;
+  }
+  .tile:hover .tile__detail,
+  .tile:focus-visible .tile__detail { opacity: 1; }
+
+  .stats__note {
+    position: absolute;
+    inset: 539px 0 auto;
+    color: var(--color-muted);
+    font-size: 20px;
+    font-style: italic;
+    font-weight: 400;
+    line-height: 26.54px;
+    transition: opacity var(--dur) var(--ease);
+  }
+
+  /* Revealed (state "b"): headline recedes behind the tiles. */
+  .stats:not(.is-armed) .stats__copy,
+  .stats.is-revealed .stats__copy {
+    filter: blur(12.5px); /* Figma layer blur 25 */
+    opacity: 0.3;
+  }
+
+  /* Armed but not yet revealed (state "a"): thin grey bars under the headline. */
+  @media (min-width: 1181px) {
+    .stats.is-armed:not(.is-revealed) .tile {
+      height: 24px;
+      margin-top: 155px; /* bars sit at y=415 */
+      pointer-events: none;
+    }
+    .stats.is-armed:not(.is-revealed) :is(.tile__glow, .tile__label),
+    .stats.is-armed:not(.is-revealed) .stats__note { opacity: 0; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .stats * { transition: none !important; }
+  }
+
+  @media (max-width: 1180px) {
+    .stats { height: auto; padding: 96px 24px; }
+    .stats__copy { padding-top: 0; }
+    .stats__title { font-size: clamp(44px, 9vw, 116px); line-height: 0.85; }
+    .stats__tiles {
+      position: static;
+      transform: none;
+      width: auto;
+      margin-top: -40px;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 16px;
+    }
+    .stats__note { position: static; margin-top: 48px; font-size: 16px; line-height: 1.3; }
+  }
+</style>

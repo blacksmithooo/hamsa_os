@@ -1,0 +1,61 @@
+---
+// Figma: headline (181:3002), subhead (181:3003) and "Bird" image (181:3019); section spans y 0–726.
+---
+<section class="hero">
+  <img
+    class="hero__bird"
+    src="/images/hero-bird.webp"
+    alt="A starling perched on a budding branch"
+    width="401"
+    height="355"
+  />
+  <h1 class="hero__title">The unified operating system for capital markets.</h1>
+  <p class="hero__sub">
+    Stop building operational infrastructure.<br />
+    Build differentiated financial products instead.
+  </p>
+</section>
+
+<style>
+  .hero {
+    position: relative;
+    max-width: var(--frame);
+    height: 726px;
+    margin: 0 auto;
+    padding: 211px 0 0 62px;
+    overflow: hidden;
+  }
+  .hero__title {
+    position: relative;
+    width: 993px;
+    font-family: var(--font-display);
+    font-size: 116px;
+    font-weight: 400;
+    line-height: 98.6px; /* 85% */
+    letter-spacing: 0;
+  }
+  .hero__sub {
+    position: relative;
+    width: 1091px;
+    margin-top: 22.2px; /* Figma: subhead top (529) − headline bottom (211 + 3 × 98.6) */
+    font-size: 40px;
+    font-weight: 400;
+    line-height: 40px;
+  }
+  .hero__bird {
+    position: absolute;
+    left: 1055px;
+    top: 117px;
+    width: 401px;
+    height: 355.48px;
+    object-fit: cover;
+  }
+
+  @media (max-width: 1100px) {
+    .hero { height: auto; padding: 140px 24px 96px; }
+    .hero__title, .hero__sub { width: auto; }
+    .hero__title { font-size: clamp(48px, 10vw, 116px); line-height: 0.85; }
+    .hero__sub { font-size: clamp(22px, 3.6vw, 40px); line-height: 1; margin-top: 24px; }
+    .hero__bird { left: auto; right: -16px; top: 72px; width: clamp(160px, 30vw, 401px); height: auto; opacity: 0.9; }
+  }
+</style>
