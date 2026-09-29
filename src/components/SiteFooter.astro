@@ -1,0 +1,120 @@
+---
+import { asset } from '../lib/asset';
+// Figma: "Module 7" (181:956) sits over the white top of "Footer" (181:948): a 1440×1880 sky
+// photo (stretched), a navy scrim from y=1171, link columns at y=1280 and the 1312px wordmark.
+const columns = [
+  { label: 'Infrastructure', links: ['Platform', 'Canonical Primitives and Verified Financial Services', 'Cloud-Native<br />Subledgers', 'Koru', 'AI Coordination'] },
+  { label: 'Applications', links: ['Overview', 'Subaccounting', 'Digital Transfer<br />Agency', 'Settlement<br />and Tokenization'] },
+  { label: 'Resources', links: ['About us', 'Security, Regulatory and Disclosure'], extra: { label: 'Social', links: ['Linkedin', 'X'] } },
+  { label: 'Legal', links: ['Terms of use', 'Privacy policy'], note: '©2027 Hamsa, LLC.<br />All rights reserved.' },
+];
+---
+<footer class="footer" id="contact">
+  <div class="footer__bg" aria-hidden="true"></div>
+
+  <div class="closing">
+    <img class="closing__icon" src={asset('images/icons/hamsa-icon-black.svg')} alt="" width="56" height="63" />
+    <h2 class="closing__title">Stop building infrastructure.<br />Build what’s next.</h2>
+    <p class="closing__sub body-20">Your assets. Your applications. Your partners. One operating system.</p>
+    <a class="pill closing__cta" href="mailto:hello@hamsa.com">Request a demo</a>
+  </div>
+
+  <div class="footer__main">
+    <img class="footer__icon" src={asset('images/icons/hamsa-icon-white.svg')} alt="Hamsa" width="54" height="61" />
+    <nav class="footer__cols" aria-label="Footer">
+      {columns.map((c) => (
+        <div class="footer__col">
+          <p class="footer__label">{c.label}</p>
+          <ul>{c.links.map((l) => <li><a href="#" set:html={l} /></li>)}</ul>
+          {c.extra && (
+            <>
+              <p class="footer__label footer__label--extra">{c.extra.label}</p>
+              <ul>{c.extra.links.map((l) => <li><a href="#">{l}</a></li>)}</ul>
+            </>
+          )}
+          {c.note && <p class="footer__note" set:html={c.note} />}
+        </div>
+      ))}
+    </nav>
+    <img class="footer__wordmark" src={asset('images/icons/hamsa-wordmark-white.svg')} alt="" width="1312" height="298" />
+  </div>
+</footer>
+
+<style define:vars={{ sky: `url(${asset('images/footer-sky.webp')})` }}>
+  .footer {
+    position: relative;
+    max-width: var(--frame);
+    height: 1880px;
+    margin: 0 auto;
+    color: #fff;
+    isolation: isolate;
+  }
+  .footer__bg {
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background:
+      linear-gradient(180deg, rgb(49 49 80 / 0) 1171px, #313150 1596.5px),
+      var(--sky) center / 100% 100% no-repeat; /* Figma: STRETCH + "Footer scrim" */
+  }
+  /* The photo is full-bleed in Figma; extend it past the 1440 frame on wider screens. */
+  @media (min-width: 1441px) {
+    .footer__bg { left: calc((100vw - 1440px) / -2); right: calc((100vw - 1440px) / -2); }
+  }
+
+  .closing {
+    position: absolute;
+    top: 20px;
+    left: 0;
+    right: 0;
+    color: #000;
+    text-align: center;
+  }
+  .closing__icon { margin: 0 auto; width: 56.1px; height: auto; }
+  .closing__title { margin-top: 29px; font-size: 48px; font-weight: 500; line-height: 48px; }
+  .closing__sub { margin-top: 22px; }
+  .closing__cta { margin-top: 41.5px; width: 291px; padding: 0; }
+
+  .footer__main { position: absolute; inset: 1280px 0 0; }
+  .footer__icon { position: absolute; left: 64px; top: 0; width: 54px; height: auto; }
+  .footer__cols {
+    position: absolute;
+    left: 509px;
+    top: 0;
+    display: grid;
+    grid-template-columns: 223px 223px 222px 217px;
+  }
+  .footer__label {
+    height: 24px;
+    color: #b1b1c0;
+    font-size: 11px;
+    font-weight: 500;
+    line-height: 10.45px;
+    letter-spacing: 2.2px;
+    text-transform: uppercase;
+  }
+  .footer__label--extra { margin-top: 33.6px; }
+  .footer__col ul { display: grid; gap: 4.6px; width: 207.5px; }
+  .footer__col a {
+    display: block;
+    font-size: 23px;
+    font-weight: 500;
+    line-height: 20.7px;
+    letter-spacing: -0.23px;
+  }
+  .footer__col a:hover, .footer__col a:focus-visible { text-decoration: underline; text-underline-offset: 3px; }
+  .footer__note { margin-top: 12.3px; color: #b1b1c0; font-size: 11px; font-weight: 500; line-height: 11px; }
+  .footer__wordmark { position: absolute; left: 64px; top: 246px; width: 1312px; height: auto; }
+
+  @media (max-width: 1100px) {
+    .footer { height: auto; min-height: 1400px; padding: 60px 16px 40px; }
+    .closing { position: static; padding: 0 8px; }
+    .closing__title { font-size: 34px; line-height: 36px; }
+    .footer__main { position: relative; inset: auto; margin-top: 520px; }
+    .footer__icon, .footer__cols, .footer__wordmark { position: static; }
+    .footer__cols { grid-template-columns: 1fr 1fr; gap: 32px 16px; margin-top: 32px; }
+    .footer__col ul { width: auto; }
+    .footer__col a { font-size: 19px; line-height: 19px; }
+    .footer__wordmark { width: 100%; margin-top: 48px; }
+  }
+</style>

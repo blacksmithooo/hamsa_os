@@ -1,0 +1,187 @@
+---
+import { asset } from '../lib/asset';
+// Figma: "Module 1" (181:2667). Five frames of one scroll-driven sequence, 1440×810 each:
+//   1a  full-bleed starling murmuration, "Don't sacrifice privacy."       (181:2721)
+//   1a' same image, "Operate as one."                                     (195:4460)
+//   1b  image shrinks to a 1090×580 card (radius 100) on the embossed bg   (181:2692)
+//   1c  card becomes a 637×176 ring (30px image stroke), "Request a demo"   (181:2680)
+//   1d  ring becomes a 579×120 black 2px outline pill; scrim fades to white (181:2668)
+// The section pins for several screens while scroll progress drives the interpolation.
+---
+<section class="flock" data-flock aria-label="Don't sacrifice privacy. Operate as one.">
+  <div class="flock__stage">
+    <div class="flock__bg" aria-hidden="true"></div>
+    <div class="flock__media" data-media aria-hidden="true">
+      <div class="flock__hole" data-hole></div>
+    </div>
+    <p class="flock__line" data-line="0">Don't sacrifice privacy.</p>
+    <p class="flock__line" data-line="1">Operate as one.</p>
+    <a class="flock__cta" href="#contact" data-cta>Request a demo</a>
+    <div class="flock__scrim" data-scrim aria-hidden="true"></div>
+  </div>
+</section>
+
+<script>
+  type Box = { w: number; h: number; r: number; ring: number };
+  // Keyframes in Figma pixels, centred on the stage. `w: 0` means "full stage".
+  const FULL: Box = { w: 0, h: 0, r: 0, ring: 0 };
+  const CARD: Box = { w: 1090, h: 580.3, r: 100, ring: 0 };
+  const RING: Box = { w: 637, h: 176, r: 100, ring: 30 };
+  const PILL: Box = { w: 579, h: 120, r: 100, ring: 0 };
+
+  const clamp = (v: number, a = 0, b = 1) => Math.min(b, Math.max(a, v));
+  const lerp = (a: number, b: number, t: number) => a + (b - a) * t;
+  const ease = (t: number) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
+  const seg = (p: number, a: number, b: number) => ease(clamp((p - a) / (b - a)));
+
+  document.querySelectorAll<HTMLElement>('[data-flock]').forEach((root) => {
+    const media = root.querySelector<HTMLElement>('[data-media]')!;
+    const hole = root.querySelector<HTMLElement>('[data-hole]')!;
+    const lines = root.querySelectorAll<HTMLElement>('[data-line]');
+    const cta = root.querySelector<HTMLElement>('[data-cta]')!;
+    const scrim = root.querySelector<HTMLElement>('[data-scrim]')!;
+    const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    const render = () => {
+      const stage = root.firstElementChild as HTMLElement;
+      const W = stage.clientWidth;
+      const H = stage.clientHeight;
+      const k = Math.min(1, W / 1440); // scale Figma sizes on narrower screens
+      const total = root.offsetHeight - H;
+      const p = reduce ? 1 : clamp(-root.getBoundingClientRect().top / total);
+
+      // Phase boundaries along the scroll.
+      const tText = seg(p, 0.14, 0.24); // phrase 1 → phrase 2
+      const tCard = seg(p, 0.34, 0.52); // full bleed → card
+      const tRing = seg(p, 0.58, 0.74); // card → ring
+      const tPill = seg(p, 0.8, 0.94); // ring → outline pill
+
+      const full: Box = { ...FULL, w: W / k, h: H / k };
+      let b: Box;
+      if (tRing === 0) b = mix(full, CARD, tCard);
+      else if (tPill === 0) b = mix(CARD, RING, tRing);
+      else b = mix(RING, PILL, tPill);
+
+      media.style.width = `${b.w * k}px`;
+      media.style.height = `${b.h * k}px`;
+      media.style.borderRadius = `${b.r * k}px`;
+      media.style.opacity = String(1 - tPill);
+      media.style.setProperty('--ring-o', String(tRing)); // Figma uses a separate texture for the ring
+      const inset = b.ring * k;
+      hole.style.inset = `${inset}px`;
+      hole.style.borderRadius = `${Math.max(0, b.r * k - inset)}px`;
+      hole.style.opacity = String(tRing);
+      hole.style.backgroundSize = `${W}px ${H}px`; // line up with the stage background
+
+      lines[0].style.opacity = String((1 - tText) * (1 - tCard));
+      lines[1].style.opacity = String(tText * (1 - tCard));
+      cta.style.opacity = String(tRing);
+      cta.style.pointerEvents = tRing > 0.5 ? 'auto' : 'none';
+      cta.style.width = `${b.w * k}px`;
+      cta.style.height = `${b.h * k}px`;
+      cta.style.borderColor = `rgb(0 0 0 / ${tPill})`;
+      scrim.style.opacity = String(tPill);
+    };
+
+    const mix = (a: Box, b: Box, t: number): Box => ({
+      w: lerp(a.w, b.w, t),
+      h: lerp(a.h, b.h, t),
+      r: lerp(a.r, b.r, t),
+      ring: lerp(a.ring, b.ring, t),
+    });
+
+    let queued = false;
+    const onScroll = () => {
+      if (queued) return;
+      queued = true;
+      requestAnimationFrame(() => {
+        queued = false;
+        render();
+      });
+    };
+    addEventListener('scroll', onScroll, { passive: true });
+    addEventListener('resize', onScroll);
+    render();
+  });
+</script>
+
+<style define:vars={{ flock: `url(${asset('images/flock.webp')})`, emboss: `url(${asset('images/emboss-bg.webp')})`, ring: `url(${asset('images/flock-ring.webp')})` }}>
+  .flock {
+    position: relative;
+    height: 500vh; /* scroll distance for the whole sequence */
+  }
+  .flock__stage {
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    overflow: hidden;
+    display: grid;
+    place-items: center;
+  }
+  .flock__stage > * { grid-area: 1 / 1; }
+  .flock__bg {
+    position: absolute;
+    inset: 0;
+    background: var(--emboss) center / 100% 100% no-repeat; /* Figma: STRETCH */
+  }
+  .flock__media {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    background: var(--flock) center / cover no-repeat;
+  }
+  .flock__media::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: var(--ring) center / cover no-repeat; /* Figma: FILL */
+    opacity: var(--ring-o, 0);
+  }
+  /* Inside of the ring: shows the embossed background through a frosted pane (Figma: fill 2% white, bg blur 25). */
+  .flock__hole {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    background: var(--emboss) center / 100% 100% no-repeat;
+    box-shadow: inset 0 0 0 100vmax rgb(255 255 255 / 0.02);
+  }
+  .flock__line {
+    position: relative;
+    margin-top: -106px; /* Figma: text sits 53px above centre */
+    color: #fff;
+    font-size: 80px;
+    font-weight: 500;
+    line-height: 68px; /* 85% */
+    text-align: center;
+    pointer-events: none;
+  }
+  .flock__line[data-line='1'] { opacity: 0; }
+  .flock__cta {
+    position: relative;
+    display: grid;
+    place-items: center;
+    border: 2px solid transparent;
+    border-radius: 100px;
+    color: #000;
+    font-size: 48px;
+    font-weight: 500;
+    line-height: 48px;
+    opacity: 0;
+    transition: background-color 200ms ease, color 200ms ease;
+  }
+  .flock__cta:hover, .flock__cta:focus-visible { background: rgb(0 0 0 / 0.85); color: #fff; }
+  .flock__scrim {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to bottom, rgb(255 255 255 / 0) 55.8%, #fff 96%); /* Figma scrim, y 452→779 of 810 */
+    opacity: 0;
+    pointer-events: none;
+  }
+  .flock__cta { z-index: 1; }
+
+  @media (max-width: 767px) {
+    .flock__line { font-size: 44px; line-height: 40px; padding: 0 16px; }
+    .flock__cta { font-size: 28px; }
+  }
+</style>

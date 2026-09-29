@@ -1,0 +1,215 @@
+---
+import { asset } from '../lib/asset';
+// Figma: "Keep your data 1–4" (193:4222, 193:4026, 193:3830, 192:3633). One section in four steps:
+//   1 — gradient panel 644×143 with the OS title        2 — panel 1090×204, "Hamsa AI" card arrives
+//   3 — panel 1090×480, "Verified Financial Services"   4 — panel 1090×901, "Hamsa Unified Ledger"
+// Built at its final size (so the page never jumps); scroll position picks the step.
+const layers = [
+  {
+    n: '01', title: 'Hamsa AI', sub: 'One logical authoritative ledger for capital markets', icon: 'layer-ai',
+    body: [['Compose. Coordinate. Execute.', 'Normalize fragmented data, compose applications from verified financial services, reconcile records, coordinate workflows and execute capital-market transactions.']],
+  },
+  {
+    n: '02', title: 'Verified<br />Financial Services', sub: 'Institutional business logic and execution', icon: 'layer-services',
+    body: [['Unified book. Unified settlement. Canonical primitives.', 'Use standardized financial data and reusable, verifiable services across accounting, transaction processing, reconciliation, settlement and compliance.']],
+  },
+  {
+    n: '03', title: 'Hamsa<br />Unified Ledger', sub: 'One logical authoritative ledger for capital markets', icon: 'layer-ledger',
+    body: [
+      ['Koru Blockchain', 'Share and coordinate verifiable ownership, identity and settlement state across institutions, while controlling what each participant can see.'],
+      ['Cloud-Native Subledgers', 'Keep sensitive data and complete books and records within infrastructure you control, built for real-time operations at institutional scale.'],
+    ],
+  },
+];
+---
+<section class="stack" data-stack data-step="3">
+  <div class="stack__copy">
+    <p class="eyebrow">A unified institutional platform</p>
+    <h2 class="stack__title">Keep your data private.<br />Connect to everyone.</h2>
+    <div class="stack__intro body-20">
+      <p>Stay private locally. Connect globally on a unified ledger.</p>
+      <p>One architecture brings together AI, reusable financial services and a unified ledger to power your operations and applications.</p>
+    </div>
+  </div>
+
+  <div class="stack__panel" aria-hidden="true"></div>
+  <div class="stack__os">
+    <p class="stack__os-title">Hamsa Unified Operating System</p>
+    <p class="stack__os-sub">AI-native infrastructure for capital markets</p>
+  </div>
+
+  <ol class="stack__layers">
+    {layers.map((l, i) => (
+      <li class="layer" style={`--i: ${i}`}>
+        <h3 class="layer__title" set:html={l.title} />
+        <p class="layer__sub">{l.sub}</p>
+        <div class="layer__body">
+          {l.body.map(([lead, text]) => (
+            <p><strong>{lead}</strong><br />{text}</p>
+          ))}
+        </div>
+        <img class="layer__icon" src={asset(`images/icons/${l.icon}.svg`)} alt="" width="52" height="52" />
+        <span class="layer__rule" aria-hidden="true"></span>
+        <span class="layer__n">{l.n}</span>
+      </li>
+    ))}
+  </ol>
+  <img class="stack__arrows" style="top: 790px" src={asset('images/icons/updown-arrows.svg')} alt="" width="39" height="23" />
+  <img class="stack__arrows" style="top: 1045px" src={asset('images/icons/updown-arrows.svg')} alt="" width="39" height="23" />
+</section>
+
+<script>
+  document.querySelectorAll<HTMLElement>('[data-stack]').forEach((el) => {
+    if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    const panelTop = 439; // panel's offset inside the section (Figma)
+    const update = () => {
+      const r = el.getBoundingClientRect();
+      // How far the panel's top has travelled above the 75% line of the viewport.
+      const travelled = innerHeight * 0.75 - (r.top + panelTop);
+      const step = travelled < 120 ? 0 : travelled < 360 ? 1 : travelled < 600 ? 2 : 3;
+      el.dataset.step = String(step);
+    };
+    let queued = false;
+    addEventListener('scroll', () => {
+      if (queued) return;
+      queued = true;
+      requestAnimationFrame(() => { queued = false; update(); });
+    }, { passive: true });
+    update();
+  });
+</script>
+
+<style>
+  .stack {
+    --ease: cubic-bezier(0.22, 1, 0.36, 1);
+    position: relative;
+    max-width: var(--frame);
+    height: 1340px;
+    margin: 0 auto;
+    text-align: center;
+  }
+  .stack__copy { padding-top: 40px; }
+  .stack__title {
+    margin-top: 23.7px;
+    font-size: 80px;
+    font-weight: 500;
+    line-height: 80px;
+  }
+  .stack__intro { width: 796px; margin: 27px auto 0; }
+  .stack__intro p + p { margin-top: 10px; } /* Figma paragraph spacing */
+
+  /* Gradient panel — size and gradient per step, converted from each Figma frame. */
+  .stack__panel {
+    position: absolute;
+    top: 439px;
+    left: 50%;
+    border-radius: 20px;
+    transform: translateX(-50%);
+    transition: width 700ms var(--ease), height 700ms var(--ease), background 700ms ease;
+  }
+  .stack[data-step='0'] .stack__panel { width: 644px; height: 143px; background: linear-gradient(128.9deg, #3b3b61 0px, #d2506a 295.6px, #ffc34a 591.1px); }
+  .stack[data-step='1'] .stack__panel { width: 1090px; height: 204px; background: linear-gradient(133.7deg, #3b3b61 0px, #d2506a 464.4px, #ffc34a 928.7px); }
+  .stack[data-step='2'] .stack__panel { width: 1090px; height: 480px; background: linear-gradient(112.1deg, #3b3b61 0px, #d2506a 595.3px, #ffc34a 1190.5px); }
+  .stack[data-step='3'] .stack__panel { width: 1090px; height: 901px; background: linear-gradient(102.2deg, #3b3b61 0px, #d2506a 628px, #ffc34a 1256px); }
+
+  .stack__os {
+    position: absolute;
+    top: 472px;
+    left: 0;
+    right: 0;
+    color: #fff;
+  }
+  .stack__os-title { font-size: 36px; font-weight: 600; line-height: 36px; }
+  .stack__os-sub { margin-top: 3px; font-size: 20px; font-weight: 500; line-height: 26.54px; }
+
+  /* Layer cards: 866×203, radius 20, shadow 0 0 50 rgba(0,0,0,.15), every 253px from y=573. */
+  .layer {
+    position: absolute;
+    left: 50%;
+    top: calc(573px + var(--i) * 253px);
+    width: 866px;
+    height: 203px;
+    margin-left: -433px;
+    border-radius: 20px;
+    background: #fff;
+    box-shadow: 0 0 50px rgb(0 0 0 / 0.15);
+    text-align: left;
+    transition: opacity 600ms var(--ease), transform 700ms var(--ease);
+  }
+  .stack[data-step='0'] .layer,
+  .stack[data-step='1'] .layer:nth-child(n + 2),
+  .stack[data-step='2'] .layer:nth-child(n + 3) { opacity: 0; transform: translateY(40px); }
+  .stack[data-step='0'] .stack__arrows,
+  .stack[data-step='1'] .stack__arrows,
+  .stack[data-step='2'] .stack__arrows:last-of-type { opacity: 0; }
+  .stack__arrows { position: absolute; left: 708px; transition: opacity 400ms ease; }
+
+  .layer__title {
+    position: absolute;
+    left: 44px;
+    top: 23px;
+    color: var(--stat-1);
+    font-size: 28px;
+    font-weight: 500;
+    line-height: 23.8px; /* 85% */
+  }
+  .layer__sub {
+    position: absolute;
+    left: 44px;
+    top: 55px;
+    width: 197px;
+    color: var(--color-muted);
+    font-size: 14px;
+    font-weight: 600;
+    line-height: 18.58px;
+  }
+  .layer:nth-child(2) .layer__sub, .layer:nth-child(3) .layer__sub { top: 78px; width: 252px; }
+  .layer:nth-child(3) .layer__sub { width: 197px; }
+  .layer__body {
+    position: absolute;
+    left: 334px;
+    top: 30px;
+    width: 432px;
+    color: var(--color-muted);
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 18.58px;
+  }
+  .layer__body strong { color: var(--stat-1); font-weight: 700; }
+  .layer__icon { position: absolute; left: 41px; top: 134px; }
+  .layer__rule {
+    position: absolute;
+    left: 102px;
+    top: 176px;
+    width: 729px;
+    border-top: 0.5px solid var(--stat-1);
+  }
+  .layer__n {
+    position: absolute;
+    right: 35px;
+    top: 160px;
+    color: var(--stat-1);
+    font-size: 8px;
+    font-weight: 600;
+    line-height: 7.6px;
+    letter-spacing: 1.6px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .stack * { transition: none !important; }
+  }
+
+  @media (max-width: 1100px) {
+    .stack { height: auto; padding: 0 16px 64px; }
+    .stack__title { font-size: 44px; line-height: 44px; }
+    .stack__intro { width: auto; }
+    .stack__panel { display: none; }
+    .stack__os { position: static; margin-top: 48px; padding: 24px; border-radius: 20px; background: linear-gradient(112deg, #3b3b61, #d2506a 50%, #ffc34a); }
+    .stack__layers { display: grid; gap: 16px; margin-top: 16px; }
+    .layer { position: relative; left: auto; top: auto; width: auto; height: auto; margin: 0; padding: 24px; opacity: 1 !important; transform: none !important; }
+    .layer > * { position: static !important; width: auto !important; }
+    .layer__body { margin-top: 16px; }
+    .layer__icon { margin-top: 16px; }
+    .layer__rule, .stack__arrows { display: none; }
+  }
+</style>

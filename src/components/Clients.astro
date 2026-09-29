@@ -1,0 +1,68 @@
+---
+import { asset } from '../lib/asset';
+// Figma: "Clients and Partners" (192:3601). Five logos with Microsoft repeated at both edges
+// (x = −36 and x = 1319), i.e. one loop of a continuously scrolling strip, 1355px long.
+// Logo boxes and spacing are the Figma values; every logo is centred on the same line.
+const logos = [
+  { src: 'logo-microsoft', alt: 'Microsoft', w: 210.6, h: 158, gap: 92.4 },
+  { src: 'logo-abc', alt: 'Banco ABC Brasil', w: 93.9, h: 93.9, gap: 92.1 },
+  { src: 'logo-safra', alt: 'Safra National Bank', w: 222, h: 222, gap: 93 },
+  { src: 'logo-cyberport', alt: 'Cyberport', w: 176.7, h: 72.4, gap: 92.3 },
+  { src: 'logo-bcb', alt: 'Banco Central do Brasil', w: 189.3, h: 189.3, gap: 92.7 },
+];
+---
+<section class="clients">
+  <div class="clients__head">
+    <p class="eyebrow">Clients and partners</p>
+    <h2 class="clients__title">Trusted by business across the globe</h2>
+  </div>
+  <div class="clients__viewport">
+    <ul class="clients__strip">
+      {[0, 1, 2].map((copy) => logos.map((l) => (
+        <li style={`width:${l.w}px; margin-right:${l.gap}px`} aria-hidden={copy > 0 ? 'true' : undefined}>
+          <img src={asset(`images/${l.src}.webp`)} alt={copy > 0 ? '' : l.alt} width={l.w} height={l.h} loading="lazy" />
+        </li>
+      )))}
+    </ul>
+  </div>
+</section>
+
+<style>
+  .clients {
+    max-width: var(--frame);
+    margin: 0 auto;
+    text-align: center;
+  }
+  .clients__title { margin-top: 35.7px; font-size: 48px; font-weight: 500; line-height: 45.6px; }
+  .clients__viewport {
+    position: relative;
+    height: 222px;
+    margin-top: 29.4px; /* logos centred at y=235 of the section */
+    overflow: hidden;
+  }
+  .clients__strip {
+    display: flex;
+    align-items: center;
+    width: max-content;
+    height: 100%;
+    padding-left: 0;
+    transform: translateX(-36px);
+    animation: clients-scroll 40s linear infinite;
+  }
+  .clients__strip li { flex: none; display: grid; place-items: center; }
+  .clients__strip img { width: 100%; height: auto; }
+  .clients__viewport:hover .clients__strip { animation-play-state: paused; }
+
+  @keyframes clients-scroll {
+    from { transform: translateX(-36px); }
+    to { transform: translateX(calc(-36px - 1355px)); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .clients__strip { animation: none; }
+  }
+  @media (max-width: 767px) {
+    .clients__title { font-size: 32px; line-height: 34px; padding: 0 16px; }
+    .clients__viewport { height: 150px; }
+    .clients__strip { zoom: 0.65; }
+  }
+</style>

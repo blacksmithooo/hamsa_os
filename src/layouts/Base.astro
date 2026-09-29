@@ -1,9 +1,11 @@
 ---
 import { asset } from '../lib/asset';
+import { ADOBE_FONTS_CSS } from '../config';
 import '@fontsource/figtree/400.css';
 import '@fontsource/figtree/400-italic.css';
 import '@fontsource/figtree/500.css';
 import '@fontsource/figtree/600.css';
+import '@fontsource/figtree/700.css';
 import '../styles/global.css';
 
 interface Props {
@@ -20,6 +22,7 @@ const { title = 'Hamsa – Powering the Finternet', description = 'Hamsa builds 
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="description" content={description} />
     <link rel="icon" href={asset('favicon.svg')} type="image/svg+xml" />
+    {ADOBE_FONTS_CSS && <link rel="stylesheet" href={ADOBE_FONTS_CSS} />}
     <title>{title}</title>
   </head>
   <body>

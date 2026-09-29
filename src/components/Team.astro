@@ -1,0 +1,161 @@
+---
+import { asset } from '../lib/asset';
+// Figma: "Module 6a" (181:990) and "Module 6b" (181:966) — the same carousel at slide 01 and 02.
+// Photos are 310×467 on a 334px step; the active one sits at x=287 with a gradient band,
+// and its name and bio show underneath. The strip wraps (06 appears left of 01).
+//
+// Names and bios: Adam and Hubert come from R3. Kenny Zee, Wenhao Lin and Simon Charlat are the
+// captions under the same photos on page R2; their bios are not in the file yet. Photo 05 has no
+// name anywhere in the file.
+const people = [
+  { name: 'Adam Zbar', role: 'Founder and CEO', photo: 'team-adam', mark: 'mark-b', bio: 'Adam is a serial, Webby-winning Silicon Valley entrepreneur. As the founder and CEO of Sunbasket.com, Adam raised over $100M in venture capital, grew the e-commerce service from $0-300M in revenues in 4 years, and sold the company for $550M dollars. Adam started his career at McKinsey & Company.' },
+  { name: 'Hubert Wu', role: 'Founder and CTO', photo: 'team-hubert', mark: 'mark-c', bio: "Hubert is one of the world's foremost x-border payment leaders. As Head of Global Payment Engineering and Chief Architect, he built AliPay's and AliExpress' first x-border payment systems. He was also VP of technologies at Amex." },
+  { name: 'Kenny Zee', role: 'VP of Product', photo: 'team-3', mark: 'mark-b', bio: '' },
+  { name: 'Wenhao Lin, PhD', role: 'VP of Engineering, Research', photo: 'team-4', mark: 'mark-c', bio: '' },
+  { name: '', role: '', photo: 'team-5', mark: 'mark-b', bio: '' },
+  { name: 'Simon Charlat', role: 'Head of Financial Technology', photo: 'team-6', mark: 'mark-c', bio: '' },
+];
+const total = String(people.length).padStart(2, '0');
+---
+<section class="team" data-team aria-roledescription="carousel" aria-label="Team">
+  <div class="team__head">
+    <p class="eyebrow">Experience</p>
+    <h2 class="team__title">Built by operators who know your world.</h2>
+    <p class="team__sub body-20">Our team has designed and operated some of the world’s largest wealth-management, brokerage, settlement and subaccounting platforms.</p>
+  </div>
+
+  <p class="team__count eyebrow" aria-live="polite"><span data-current>01</span><span class="team__total">/{total}</span></p>
+  <div class="team__nav">
+    <button type="button" aria-label="Previous person" data-prev></button>
+    <button type="button" aria-label="Next person" data-next></button>
+  </div>
+
+  <ul class="team__track">
+    {people.map((p, i) => (
+      <li class="team__slide" data-slide={i}>
+        <img src={asset(`images/${p.photo}.webp`)} alt={p.name || 'Hamsa team member'} width="310" height="467" loading="lazy" />
+      </li>
+    ))}
+  </ul>
+
+  <div class="team__info">
+    {people.map((p, i) => (
+      <div class="team__person" data-person={i} hidden={i !== 0}>
+        <p class="team__name">{p.name}</p>
+        <p class="team__role">{p.role}</p>
+        <span class="team__rule" aria-hidden="true"></span>
+        <img class="team__mark" src={asset(`images/icons/${p.mark}.svg`)} alt="" width="27" height="27" />
+        {p.bio && <p class="team__bio">{p.bio}</p>}
+      </div>
+    ))}
+  </div>
+</section>
+
+<script>
+  document.querySelectorAll<HTMLElement>('[data-team]').forEach((root) => {
+    const slides = [...root.querySelectorAll<HTMLElement>('[data-slide]')];
+    const persons = [...root.querySelectorAll<HTMLElement>('[data-person]')];
+    const current = root.querySelector<HTMLElement>('[data-current]')!;
+    const n = slides.length;
+    const STEP = 334;
+    let active = 0;
+    const offsets = new Array(n).fill(0);
+
+    // Slot of slide k relative to the active one, wrapped into −2…3 so the strip loops.
+    const slot = (k: number) => ((((k - active) % n) + n + 2) % n) - 2;
+
+    const render = (animate: boolean) => {
+      slides.forEach((el, k) => {
+        const s = slot(k);
+        const jump = Math.abs(s - offsets[k]) > 1; // wrapped to the other end: move without animating
+        el.style.transition = animate && !jump ? '' : 'none';
+        el.style.transform = `translateX(${s * STEP}px)`;
+        el.classList.toggle('is-active', s === 0);
+        offsets[k] = s;
+      });
+      persons.forEach((el, k) => (el.hidden = k !== active));
+      current.textContent = String(active + 1).padStart(2, '0');
+    };
+    const go = (d: number) => {
+      active = (active + d + n) % n;
+      render(true);
+    };
+    root.querySelector('[data-prev]')!.addEventListener('click', () => go(-1));
+    root.querySelector('[data-next]')!.addEventListener('click', () => go(1));
+    slides.forEach((el, k) => el.addEventListener('click', () => { if (k !== active) go(slot(k)); }));
+    render(false);
+  });
+</script>
+
+<style define:vars={{ arrows: `url(${asset('images/icons/carousel-arrows.svg')})` }}>
+  .team {
+    position: relative;
+    max-width: var(--frame);
+    height: 947px;
+    margin: 0 auto;
+  }
+  .team__head { width: 1038.8px; margin: 0 auto; text-align: center; }
+  .team__title { margin-top: 35.7px; font-size: 48px; font-weight: 500; line-height: 45.6px; }
+  .team__sub { width: 761px; margin: 27.4px auto 0; }
+
+  .team__count { position: absolute; left: 287px; top: 245px; font-variant-numeric: tabular-nums; }
+  .team__total { position: absolute; left: 111px; }
+  .team__nav {
+    position: absolute;
+    left: 1217px;
+    top: 237px;
+    display: flex;
+    width: 48px;
+    height: 16.7px;
+    background: var(--arrows) center / contain no-repeat;
+  }
+  .team__nav button { flex: 1; padding: 0; border: 0; background: none; cursor: pointer; }
+  .team__nav button:focus-visible { outline: 2px solid var(--stat-1); outline-offset: 2px; }
+
+  .team__track { position: absolute; inset: 277px 0 auto; height: 467px; overflow: visible; }
+  .team__slide {
+    position: absolute;
+    left: 287px;
+    top: 0;
+    width: 310px;
+    height: 467px;
+    overflow: hidden;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: transform 600ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .team__slide img { width: 100%; height: 100%; object-fit: fill; } /* Figma: STRETCH */
+  .team__slide.is-active { cursor: default; }
+  .team__slide.is-active::after {
+    content: '';
+    position: absolute;
+    inset: auto 0 0;
+    height: 9px;
+    background: linear-gradient(170.8deg, #3b3b61 0px, #d2506a 29.3px, #ffc34a 58.5px);
+  }
+
+  .team__info { position: absolute; left: 287px; top: 758px; width: 557px; }
+  .team__person { position: relative; min-height: 190px; }
+  .team__name { padding-top: 11px; font-size: 32px; font-weight: 600; line-height: 21.23px; }
+  .team__role { margin-top: 12px; font-size: 16px; font-weight: 500; line-height: 21.23px; }
+  .team__rule { position: absolute; left: 0; top: 81px; width: 557px; border-top: 1px solid var(--color-rule); }
+  .team__mark { position: absolute; left: 0; top: 96px; }
+  .team__bio { position: absolute; left: 111px; top: 94px; width: 437px; font-size: 16px; font-weight: 500; line-height: 21.23px; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .team__slide { transition: none; }
+  }
+
+  @media (max-width: 1100px) {
+    .team { height: auto; padding: 0 16px 64px; overflow: hidden; }
+    .team__head, .team__sub { width: auto; }
+    .team__title { font-size: 34px; line-height: 34px; }
+    .team__count, .team__nav { position: relative; left: auto; top: auto; margin-top: 32px; }
+    .team__nav { margin-left: auto; margin-top: -16px; }
+    .team__track { position: relative; inset: auto; margin-top: 16px; }
+    .team__slide { left: 0; }
+    .team__info { position: relative; left: auto; top: auto; width: auto; margin-top: 16px; }
+    .team__rule { width: 100%; }
+    .team__bio { position: static; width: auto; margin: 70px 0 0 44px; }
+  }
+</style>

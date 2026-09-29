@@ -1,0 +1,99 @@
+---
+// Figma: "Module 2a" (181:2605) and "Module 2b" (181:2543), one 1440×671 section in two states:
+//   2a — "Tokenized Deposits" at half size (blur 4) and "Cash" at quarter size (blur 10), still arriving
+//   2b — all ten circles at full size, forming the cluster
+// Built as a reveal: the two circles grow into place when the section scrolls into view.
+// Each circle's gradient is converted exactly from its Figma handles (they are offset per circle).
+const circles = [
+  { label: 'Mutual<br />Funds', x: 923, y: 84, bg: 'linear-gradient(55.1deg, #3b3b61 -187.1px, #d2506a 63.4px, #ffc34a 313.9px)' },
+  { label: 'Money Market<br />Funds', x: 772, y: 172, bg: 'linear-gradient(55.1deg, #3b3b61 -22.6px, #d2506a 227.5px, #ffc34a 477.6px)' },
+  { label: 'Equities', x: 1074, y: 172, bg: 'linear-gradient(55.1deg, #3b3b61 -306.9px, #d2506a -58.9px, #ffc34a 189.2px)' },
+  { label: 'Fixed<br />Income', x: 621, y: 261, bg: 'linear-gradient(55.1deg, #3b3b61 99.8px, #d2506a 349.1px, #ffc34a 598.3px)' },
+  { label: 'Alternatives', x: 923, y: 261, bg: 'linear-gradient(55.1deg, #3b3b61 -143.8px, #d2506a 105.9px, #ffc34a 355.5px)' },
+  { label: 'Cash', x: 1225, y: 261, bg: 'linear-gradient(55.1deg, #3b3b61 -397.3px, #d2506a -146px, #ffc34a 105.3px)', arrive: 'far' },
+  { label: 'Tokenized<br />Assets', x: 772, y: 349, bg: 'linear-gradient(55.1deg, #3b3b61 31.1px, #d2506a 278.7px, #ffc34a 526.3px)' },
+  { label: 'Tokenized<br />Deposits', x: 1074, y: 349, bg: 'linear-gradient(55.1deg, #3b3b61 -220.1px, #d2506a 31.6px, #ffc34a 283.3px)', arrive: 'near' },
+  { label: 'Stablecoins', x: 923, y: 437, bg: 'linear-gradient(55.1deg, #3b3b61 -186.3px, #d2506a 66.3px, #ffc34a 318.8px)' },
+];
+---
+<section class="assets" data-reveal>
+  <div class="assets__copy">
+    <p class="eyebrow">Why Hamsa</p>
+    <h2 class="assets__title">Operate as one. Across your assets and partners.</h2>
+    <div class="assets__body body-20">
+      <p>Bring your traditional, tokenized and digital assets together on a Unified Ledger, without giving up control of your data.</p>
+      <p>Keep sensitive data private. Share only what’s needed. Coordinate ownership, identity and settlement across your partners in real time.</p>
+    </div>
+  </div>
+
+  <ul class="assets__cluster" aria-label="Asset classes on the Unified Ledger">
+    {circles.map((c) => (
+      <li class:list={['circle', c.arrive && `circle--${c.arrive}`]} style={`left:${c.x}px; top:${c.y}px; background:${c.bg}`}>
+        <span set:html={c.label} />
+      </li>
+    ))}
+  </ul>
+</section>
+
+<script>
+  import { observeReveal } from '../lib/reveal';
+  observeReveal();
+</script>
+
+<style>
+  .assets {
+    position: relative;
+    max-width: var(--frame);
+    height: 671px;
+    margin: 0 auto;
+  }
+  /* Copy block: x=60, y=107, padding 40/40/35/40, gap −12 */
+  .assets__copy {
+    position: absolute;
+    left: 100px;
+    top: 147px;
+    width: 452px;
+  }
+  .assets__title {
+    margin-top: 23.7px;
+    font-size: 48px;
+    font-weight: 500;
+    line-height: 45.6px; /* 95% */
+  }
+  .assets__body { margin-top: 17px; }
+  .assets__body p + p { margin-top: 10px; } /* Figma paragraph spacing */
+
+  .assets__cluster { position: absolute; inset: 0; }
+  .circle {
+    position: absolute;
+    width: 151px;
+    height: 151px;
+    display: grid;
+    place-items: center;
+    border-radius: 50%;
+    color: #fff;
+    font-size: 20.59px;
+    font-weight: 500;
+    line-height: 20.59px;
+    text-align: center;
+    transition: transform 1100ms cubic-bezier(0.22, 1, 0.36, 1), filter 1100ms ease;
+  }
+  /* State 2a: the two arriving circles, before the section is revealed. */
+  .assets.is-armed:not(.is-revealed) .circle--near { transform: scale(0.5); filter: blur(2px); }
+  .assets.is-armed:not(.is-revealed) .circle--far { transform: scale(0.25); filter: blur(5px); }
+  .circle--far { transition-delay: 150ms; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .circle { transition: none; }
+  }
+
+  @media (max-width: 1100px) {
+    .assets { height: auto; padding: 64px 24px; }
+    .assets__copy { position: static; width: auto; max-width: 560px; }
+    .assets__cluster { position: relative; height: 590px; margin-top: 40px; transform-origin: 0 0; left: -621px; }
+    .assets__title { font-size: 36px; line-height: 36px; }
+  }
+  @media (max-width: 767px) {
+    .assets__cluster { transform: scale(0.52); height: 310px; left: calc(-621px * 0.52); }
+  }
+</style>

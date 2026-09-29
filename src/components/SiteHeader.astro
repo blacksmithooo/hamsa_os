@@ -1,17 +1,110 @@
 ---
 import { asset } from '../lib/asset';
 // Figma: "Global Nav Header" (181:3004) — 1440×65, translucent white with background blur.
+// Menu: "Hamburger Menu R3 1–11" (181:5237, 183:822 …). The eleven frames are one menu with a
+// different link hovered in each: the hovered link slides right 30px and gets its number, and
+// the background steps from #d2506a to #313150.
+const columns = [
+  {
+    label: 'Infrastructure',
+    items: ['Platform', 'Canonical Primitives and Verified Financial Services', 'Cloud-Native<br />Subledgers', 'Koru', 'AI Coordination'],
+  },
+  {
+    label: 'Applications',
+    items: ['Overview', 'Subaccounting', 'Digital Transfer<br />Agency', 'Settlement<br />and Tokenization'],
+  },
+  { label: 'Resources', items: ['About us', 'Security, Regulatory and Disclosure'] },
+];
+const shades = ['#d2506a', '#c24d67', '#b24a65', '#a24762', '#924460', '#82415d', '#713d5a', '#613a58', '#513755', '#413453', '#313150'];
+let n = 0;
+const numbered = columns.map((c) => ({ ...c, items: c.items.map((html) => ({ html, i: n++ })) }));
+const clocks = [
+  ['America/New_York', 'NYC'],
+  ['America/Los_Angeles', 'San Francisco'],
+  ['Asia/Singapore', 'Singapore'],
+  ['America/Sao_Paulo', 'São Paulo'],
+  ['Europe/Zurich', 'Europe'],
+];
 ---
 <header class="site-header">
   <div class="site-header__inner">
     <a class="site-header__logo" href={asset('')} aria-label="Hamsa home">
       <img src={asset('images/hamsa-logo.svg')} alt="Hamsa" width="143" height="62" />
     </a>
-    <button class="site-header__menu" type="button" aria-label="Open menu">
+    <button class="site-header__menu" type="button" aria-label="Open menu" aria-expanded="false" aria-controls="site-menu" data-menu-open>
       <span></span><span></span>
     </button>
   </div>
 </header>
+
+<div class="menu" id="site-menu" hidden data-menu style={`--menu-bg: ${shades[0]}`}>
+  <div class="menu__bar">
+    <a class="menu__logo" href={asset('')} aria-label="Hamsa home">
+      <img src={asset('images/icons/hamsa-logo-white.svg')} alt="Hamsa" width="143" height="62" />
+    </a>
+    <button class="menu__close" type="button" aria-label="Close menu" data-menu-close></button>
+  </div>
+  <p class="menu__tagline">Powering<br />the Finternet</p>
+  <ul class="menu__clocks">
+    {clocks.map(([tz, city]) => (
+      <li><span data-tz={tz}>--:--</span>&nbsp;&nbsp;({city})</li>
+    ))}
+  </ul>
+  <nav class="menu__nav" aria-label="Main">
+    {numbered.map((col) => (
+      <div class={`menu__col menu__col--${col.label.toLowerCase()}`}>
+        <p class="menu__label">{col.label}</p>
+        <ul>
+          {col.items.map((item) => (
+            <li>
+              <a href="#" style={`--shade: ${shades[item.i]}`}>
+                <span class="menu__num">{String(item.i + 1).padStart(2, '0')}</span>
+                <span set:html={item.html} />
+              </a>
+            </li>
+          ))}
+        </ul>
+      </div>
+    ))}
+  </nav>
+</div>
+
+<script>
+  const menu = document.querySelector<HTMLElement>('[data-menu]')!;
+  const openBtn = document.querySelector<HTMLButtonElement>('[data-menu-open]')!;
+  const closeBtn = document.querySelector<HTMLButtonElement>('[data-menu-close]')!;
+
+  const setOpen = (open: boolean) => {
+    menu.hidden = !open;
+    openBtn.setAttribute('aria-expanded', String(open));
+    document.documentElement.style.overflow = open ? 'hidden' : '';
+    if (open) closeBtn.focus();
+    else openBtn.focus();
+  };
+  openBtn.addEventListener('click', () => setOpen(true));
+  closeBtn.addEventListener('click', () => setOpen(false));
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && !menu.hidden) setOpen(false);
+  });
+
+  // Background follows the hovered / focused link.
+  menu.querySelectorAll<HTMLAnchorElement>('.menu__nav a').forEach((a) => {
+    const set = () => menu.style.setProperty('--menu-bg', a.style.getPropertyValue('--shade'));
+    a.addEventListener('mouseenter', set);
+    a.addEventListener('focus', set);
+  });
+
+  // Live city clocks, formatted like the design: "09:17am".
+  const tick = () => {
+    menu.querySelectorAll<HTMLElement>('[data-tz]').forEach((el) => {
+      const parts = new Intl.DateTimeFormat('en-US', { timeZone: el.dataset.tz, hour: '2-digit', minute: '2-digit', hour12: true }).formatToParts(new Date());
+      const get = (t: string) => parts.find((p) => p.type === t)?.value ?? '';
+      el.textContent = `${get('hour')}:${get('minute')}${get('dayPeriod').toLowerCase()}`;
+    });
+  };
+  tick();
+  setInterval(tick, 30_000);
+</script>
 
 <style>
   .site-header {
@@ -30,12 +123,14 @@ import { asset } from '../lib/asset';
     height: 100%;
     margin: 0 auto;
   }
-  .site-header__logo {
+  .site-header__logo,
+  .menu__logo {
     position: absolute;
     left: 48px;
     top: 2px;
   }
-  .site-header__logo img { width: 142.3px; height: auto; }
+  .site-header__logo img,
+  .menu__logo img { width: 142.3px; height: auto; }
   .site-header__menu {
     position: absolute;
     right: 64px;
@@ -58,8 +153,123 @@ import { asset } from '../lib/asset';
   .site-header__menu span:first-child { top: 7px; }
   .site-header__menu span:last-child { top: 21px; }
 
-  @media (max-width: 767px) {
-    .site-header__logo { left: 8px; }
+  /* ---------- Menu overlay ---------- */
+  .menu {
+    position: fixed;
+    inset: 0;
+    z-index: 20;
+    overflow-y: auto;
+    background: var(--menu-bg);
+    color: #fff;
+    transition: background-color 300ms ease;
+  }
+  .menu[hidden] { display: none; }
+  .menu > * { max-width: var(--frame); }
+  .menu__bar {
+    position: relative;
+    height: 65px;
+    max-width: none;
+    border-bottom: 1px solid rgb(255 255 255 / 0.25);
+  }
+  .menu__bar > * { max-width: var(--frame); }
+  .menu__close {
+    position: absolute;
+    right: 70px;
+    top: 21px;
+    width: 22px;
+    height: 22px;
+    padding: 0;
+    border: 0;
+    background: none;
+    cursor: pointer;
+  }
+  .menu__close::before,
+  .menu__close::after {
+    content: '';
+    position: absolute;
+    left: -4px;
+    top: 10px;
+    width: 30px;
+    height: 2px;
+    background: #fff;
+    transform: rotate(45deg);
+  }
+  .menu__close::after { transform: rotate(-45deg); }
+  .menu__tagline {
+    position: absolute;
+    left: 64px;
+    top: 162px;
+    font-size: 32px;
+    font-weight: 400;
+    line-height: 32px;
+  }
+  .menu__clocks {
+    position: absolute;
+    left: 64px;
+    top: 652px; /* Figma: bottom-aligned in a 612–725 box */
+    font-size: 11px;
+    font-weight: 600;
+    line-height: 14.6px;
+    letter-spacing: 2.2px;
+    text-transform: uppercase;
+    font-variant-numeric: tabular-nums;
+  }
+  .menu__nav {
+    position: absolute;
+    left: 509px;
+    top: 162px;
+    display: grid;
+    grid-template-columns: 446px 415px;
+    grid-template-rows: auto auto;
+    column-gap: 0;
+  }
+  .menu__col--infrastructure { grid-row: 1 / span 2; }
+  .menu__col--resources { margin-top: 81px; }
+  .menu__label {
+    height: 24px;
+    font-size: 11px;
+    font-weight: 500;
+    line-height: 10.45px;
+    letter-spacing: 2.2px;
+    text-transform: uppercase;
+  }
+  .menu__col ul { display: grid; gap: 9px; }
+  .menu__col a {
+    position: relative;
+    display: block;
+    font-size: 46px;
+    font-weight: 500;
+    line-height: 41.4px;
+    letter-spacing: -0.46px;
+    transition: transform 250ms ease;
+  }
+  .menu__num {
+    position: absolute;
+    left: 0;
+    top: 6px;
+    font-size: 14px;
+    font-weight: 600;
+    line-height: 14px;
+    opacity: 0;
+    transition: opacity 200ms ease;
+  }
+  .menu__col a > span:last-child { display: block; transition: transform 250ms ease; }
+  .menu__col a:hover > span:last-child,
+  .menu__col a:focus-visible > span:last-child { transform: translateX(30px); }
+  .menu__col a:hover .menu__num,
+  .menu__col a:focus-visible .menu__num { opacity: 1; }
+  .menu__col a:focus-visible { outline: none; }
+
+  @media (max-width: 1100px) {
+    .site-header__logo, .menu__logo { left: 8px; }
     .site-header__menu { right: 16px; }
+    .menu__close { right: 20px; }
+    .menu__tagline, .menu__clocks, .menu__nav { position: static; }
+    .menu__tagline { padding: 40px 24px 0; }
+    .menu__nav { display: grid; grid-template-columns: 1fr; gap: 32px; padding: 32px 24px; }
+    .menu__col--infrastructure { grid-row: auto; }
+    .menu__col--resources { margin-top: 0; }
+    .menu__col a { font-size: 32px; line-height: 30px; }
+    .menu__clocks { padding: 0 24px 40px; }
   }
 </style>

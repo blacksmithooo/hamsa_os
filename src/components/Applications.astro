@@ -1,0 +1,194 @@
+---
+import { asset } from '../lib/asset';
+// Figma: "Module 4" (181:1198) — five copies of one section: "OFF" (resting) plus one per tile
+// ("4a"–"4d") showing that tile hovered. Hover grows the tile 162→201px and shrinks the other
+// tile in its column to 123px, fills it with its colour and shows the description + icon.
+// The "Explore applications" pill fills black on hover ("CTA ON").
+const columns = [
+  [
+    { title: 'Subaccounting', color: '#d2506a', tint: '#de7086', icon: 'app-subaccounting', lead: 'Run your books and records in real time.', text: 'Gain continuous visibility, simplify operations and respond faster to clients and markets.' },
+    { title: 'Settlement and Tokenization', color: '#82415d', tint: '#a86381', icon: 'app-settlement', lead: 'Launch and settle programmable financial products.', text: 'Move assets and money 24/7, settle faster and reduce trapped capital.' },
+  ],
+  [
+    { title: 'Digital Transfer Agency', color: '#aa4864', tint: '#c1607c', icon: 'app-dta', lead: 'Service traditional and tokenized assets together.', text: 'Eliminate separate operating models and launch new products faster from one investor record.' },
+    { title: 'AI Reconciliation', color: '#593956', tint: '#7f597c', icon: 'app-reconciliation', lead: 'Find and resolve exceptions faster.', text: 'Reduce manual work, identify root causes and resolve breaks before they create downstream problems.' },
+  ],
+];
+---
+<section class="apps">
+  <div class="apps__card">
+    <div class="apps__bg" aria-hidden="true"></div>
+    <div class="apps__glow" aria-hidden="true"></div>
+
+    <div class="apps__copy">
+      <p class="eyebrow">Applications</p>
+      <h2 class="apps__title">Build anything. On one operating system.</h2>
+      <p class="apps__sub body-20">Launch differentiated financial products on one common foundation.</p>
+    </div>
+
+    <div class="apps__grid">
+      {columns.map((col) => (
+        <ul class="apps__col">
+          {col.map((t) => (
+            <li class="app" tabindex="0" style={`--c: ${t.color}; --tint: ${t.tint}`}>
+              <h3 class="app__title">{t.title}</h3>
+              <span class="app__plus" aria-hidden="true"></span>
+              <div class="app__more">
+                <span class="app__rule" aria-hidden="true"></span>
+                <img class="app__icon" src={asset(`images/icons/${t.icon}.svg`)} alt="" width="53" height="53" />
+                <p class="app__text"><strong>{t.lead}</strong> {t.text}</p>
+              </div>
+            </li>
+          ))}
+        </ul>
+      ))}
+    </div>
+
+    <a class="pill apps__cta" href="#">Explore applications</a>
+  </div>
+</section>
+
+<style define:vars={{ sky: `url(${asset('images/apps-sky.webp')})` }}>
+  .apps {
+    max-width: var(--frame);
+    margin: 0 auto;
+    padding: 0 64px;
+  }
+  .apps__card {
+    position: relative;
+    height: 763px;
+    overflow: hidden;
+    border-radius: 50px;
+    text-align: center;
+    isolation: isolate;
+  }
+  .apps__bg {
+    position: absolute;
+    left: -64px;
+    top: -47px;
+    width: 1440px;
+    height: 810px;
+    background: var(--sky) center / 100% 100% no-repeat; /* Figma: STRETCH */
+    z-index: -2;
+  }
+  .apps__glow {
+    position: absolute;
+    left: 55px;
+    top: 72px;
+    width: 1202px;
+    height: 619px;
+    border-radius: 50%;
+    background: #fff;
+    filter: blur(125px); /* Figma layer blur 250 */
+    z-index: -1;
+  }
+  .apps__copy { padding-top: 67px; }
+  .apps__title {
+    margin-top: 35.7px;
+    font-size: 48px;
+    font-weight: 500;
+    line-height: 48px;
+  }
+  .apps__sub { margin-top: 25px; }
+
+  .apps__grid {
+    position: absolute;
+    left: 223px;
+    top: 252px;
+    display: grid;
+    grid-template-columns: 421px 421px;
+    column-gap: 24px;
+    text-align: left;
+  }
+  .apps__col {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    height: 344px;
+  }
+  .app {
+    --ease: cubic-bezier(0.22, 1, 0.36, 1);
+    position: relative;
+    height: 162px;
+    overflow: hidden;
+    border: 2px solid var(--c);
+    border-radius: 10px;
+    background: rgb(255 255 255 / 0.05);
+    backdrop-filter: blur(25px);
+    -webkit-backdrop-filter: blur(25px);
+    cursor: default;
+    transition: height 450ms var(--ease), background-color 300ms ease;
+  }
+  .apps__col:has(.app:hover, .app:focus-visible) .app { height: 123px; }
+  .apps__col:has(.app:hover, .app:focus-visible) .app:is(:hover, :focus-visible) { height: 201px; background: var(--c); outline: none; }
+
+  .app__title {
+    position: absolute;
+    left: 31px;
+    top: 16px;
+    color: var(--c);
+    font-size: 24px;
+    font-weight: 600;
+    line-height: 24px;
+    transition: color 300ms ease;
+  }
+  .app__plus {
+    position: absolute;
+    left: 31px;
+    top: 57px;
+    width: 31px;
+    height: 31px;
+    background:
+      linear-gradient(var(--tint), var(--tint)) center / 31px 1px no-repeat,
+      linear-gradient(var(--tint), var(--tint)) center / 1px 31px no-repeat;
+    transition: opacity 200ms ease;
+  }
+  .app__more { opacity: 0; transition: opacity 250ms ease; }
+  .app__rule {
+    position: absolute;
+    left: 32px;
+    top: 76px;
+    width: 355px;
+    border-top: 1px solid var(--tint);
+  }
+  .app__icon { position: absolute; left: 30px; top: 119px; }
+  .app__text {
+    position: absolute;
+    left: 110px;
+    top: 88px;
+    width: 270px;
+    color: #fff;
+    font-size: 16px;
+    font-weight: 400;
+    line-height: 21.23px;
+  }
+  .app__text strong { font-weight: 600; }
+  .app:hover .app__title, .app:focus-visible .app__title { color: #fff; }
+  .app:hover .app__plus, .app:focus-visible .app__plus { opacity: 0; }
+  .app:hover .app__more, .app:focus-visible .app__more { opacity: 1; transition-delay: 120ms; }
+
+  .apps__cta {
+    position: absolute;
+    left: 50%;
+    top: 638px;
+    width: 290.4px;
+    padding: 0;
+    transform: translateX(-50%);
+  }
+
+  @media (max-width: 1100px) {
+    .apps { padding: 0 16px; }
+    .apps__card { height: auto; padding: 0 16px 48px; border-radius: 32px; }
+    .apps__title { font-size: 34px; line-height: 36px; }
+    .apps__grid { position: static; grid-template-columns: 1fr; row-gap: 16px; margin-top: 40px; }
+    .apps__col { height: auto; gap: 16px; }
+    .app, .apps__col:has(.app:hover) .app { height: auto; min-height: 120px; }
+    .app__more { opacity: 1; position: relative; }
+    .app__plus { display: none; }
+    .app { background: var(--c); padding: 16px 16px 20px 30px; }
+    .app__title { position: static; color: #fff; }
+    .app__rule, .app__icon { display: none; }
+    .app__text { position: static; width: auto; margin-top: 12px; }
+    .apps__cta { position: relative; left: auto; top: auto; transform: none; margin-top: 32px; }
+  }
+</style>
