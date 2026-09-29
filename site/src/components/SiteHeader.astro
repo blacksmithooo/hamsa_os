@@ -85,8 +85,10 @@ const clocks = [
   const setOpen = (open: boolean) => {
     clearTimeout(closeTimer);
     openBtn.setAttribute('aria-expanded', String(open));
-    document.documentElement.style.overflow = open ? 'hidden' : '';
+    const root = document.documentElement;
     if (open) {
+      root.style.setProperty('--sbw', `${innerWidth - root.clientWidth}px`);
+      root.classList.add('menu-open');
       menu.classList.remove('is-open', 'is-closing');
       menu.hidden = false;
       void menu.offsetWidth; // start the transition from the closed state
@@ -99,6 +101,7 @@ const clocks = [
         menu.hidden = true;
         menu.classList.remove('is-closing');
         menu.style.setProperty('--menu-bg', menu.dataset.firstShade!);
+        root.classList.remove('menu-open');
       }, 320);
       openBtn.focus({ preventScroll: true });
     }
@@ -148,6 +151,8 @@ const clocks = [
   }
   /* Folded away over the footer; comes back if someone tabs to it. */
   .site-header.is-folded:not(:focus-within) { transform: translateY(-100%); }
+  :global(html.menu-open) .site-header,
+  :global(html.menu-open) .menu { padding-right: var(--sbw, 0px); }
   @media (prefers-reduced-motion: reduce) {
     .site-header { transition: none; }
   }
@@ -221,6 +226,7 @@ const clocks = [
   @media (prefers-reduced-motion: reduce) {
     .menu, .menu.is-open { clip-path: none; transition: background-color 300ms ease; }
     .menu [data-stagger], .menu.is-open [data-stagger] { opacity: 1; transform: none; transition: none; }
+    .menu__close::before, .menu__close::after { transition: none !important; }
   }
   .menu__bar {
     height: 65px;
@@ -234,12 +240,14 @@ const clocks = [
     margin: 0 auto;
   }
   .menu__body { height: auto; min-height: 745px; } /* 810 − 65 bar */
+  /* Close button: same box and two lines as the hamburger, so opening reads as the hamburger
+     morphing into an X — the lines slide together, then rotate. Closing plays it in reverse. */
   .menu__close {
     position: absolute;
-    right: 68px; /* centred on the hamburger: 64 + 30/2 = 79 from the right */
-    top: 22px; /* centre at y=33, same as the hamburger lines */
-    width: 22px;
-    height: 22px;
+    right: 64px;
+    top: 18px;
+    width: 30px;
+    height: 30px;
     padding: 0;
     border: 0;
     background: none;
@@ -249,14 +257,22 @@ const clocks = [
   .menu__close::after {
     content: '';
     position: absolute;
-    left: -4px;
-    top: 10px;
+    left: 0;
     width: 30px;
     height: 2px;
     background: #fff;
-    transform: rotate(45deg);
+    transition: top 140ms cubic-bezier(0.4, 0, 0.2, 1) 110ms, transform 140ms cubic-bezier(0.4, 0, 0.2, 1);
   }
-  .menu__close::after { transform: rotate(-45deg); }
+  .menu__close::before { top: 7px; }
+  .menu__close::after { top: 21px; }
+  .menu.is-open .menu__close::before,
+  .menu.is-open .menu__close::after {
+    top: 14px;
+    transition: top 160ms cubic-bezier(0.4, 0, 0.2, 1) 60ms, transform 260ms cubic-bezier(0.34, 1.4, 0.64, 1) 200ms;
+  }
+  .menu.is-open .menu__close::before { transform: rotate(45deg); }
+  .menu.is-open .menu__close::after { transform: rotate(-45deg); }
+  .menu__close:focus-visible { outline: 2px solid #fff; outline-offset: 6px; border-radius: 4px; }
   .menu__tagline {
     position: absolute;
     left: 64px;
@@ -326,7 +342,7 @@ const clocks = [
   @media (max-width: 1100px) {
     .site-header__logo, .menu__logo { left: 8px; }
     .site-header__menu { right: 16px; }
-    .menu__close { right: 20px; }
+    .menu__close { right: 16px; }
     .menu__tagline, .menu__clocks, .menu__nav { position: static; }
     .menu__body { min-height: 0; }
     .menu__tagline { padding: 40px 24px 0; }

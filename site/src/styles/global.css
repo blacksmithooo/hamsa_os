@@ -35,8 +35,11 @@
 
 *, *::before, *::after { box-sizing: border-box; }
 html, body { margin: 0; }
-/* Always reserve the scrollbar's space, so locking scroll (menu open) never shifts the layout. */
-html { scrollbar-gutter: stable; }
+/* While the menu is open, scrolling is locked and the scrollbar removed; the page, nav and menu are
+   padded by the scrollbar's width (--sbw, set in SiteHeader) so nothing shifts and the menu colour
+   reaches the right edge. */
+html.menu-open { overflow: hidden; }
+html.menu-open body { padding-right: var(--sbw, 0px); }
 body {
   background: var(--color-bg);
   color: var(--color-fg);
