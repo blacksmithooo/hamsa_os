@@ -3,7 +3,7 @@ import { asset } from '../lib/asset';
 // Figma: "Module 1" (181:2667). Five frames of one scroll-driven sequence, 1440×810 each:
 //   1a  full-bleed starling murmuration, "Don't sacrifice privacy."       (181:2721)
 //   1a' same image, "Operate as one."                                     (195:4460)
-//   1b  image shrinks to a 1090×580 card (radius 100) on the embossed bg   (181:2692)
+//   1b  image shrinks (passed through, not held) to a 1090×580 card (radius 100) on the embossed bg   (181:2692)
 //   1c  card becomes a 637×176 ring (30px image stroke), "Request a demo"   (181:2680)
 //   1d  ring becomes a 579×120 black 2px outline pill; scrim fades to white (181:2668)
 // The section pins while you scroll. Scroll swaps the two phrases; past a set point, 1b → 1d plays as one
@@ -27,7 +27,6 @@ import { asset } from '../lib/asset';
   type Box = { w: number; h: number; r: number; ring: number };
   // Keyframes in Figma pixels, centred on the stage. `w: 0` means "full stage".
   const FULL: Box = { w: 0, h: 0, r: 0, ring: 0 };
-  const CARD: Box = { w: 1090, h: 580.3, r: 100, ring: 0 };
   const RING: Box = { w: 637, h: 176, r: 100, ring: 30 };
   const PILL: Box = { w: 579, h: 120, r: 100, ring: 0 };
 
@@ -43,16 +42,17 @@ import { asset } from '../lib/asset';
     const scrim = root.querySelector<HTMLElement>('[data-scrim]')!;
     const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-    // The 1b → 1d transition as a timeline in ms, built from the motion durations (--dur-1…3).
-    const T_CARD = [0, 800], T_RING = [800, 1200], T_HOLE = [1200, 1400], T_PILL = [1600, 2400];
-    const T_CTA = 1400; // "Request a demo" words start once the ring is complete
-    const T_END = T_PILL[1];
+    // 1b → 1d is one continuous motion: a single Murmuration ease over --dur-4 carries the photo from full
+    // bleed to the pill (passing through the card and ring shapes, never stopping on them). The ring, the hole
+    // and the outline blend in over windows of that one eased progress, so nothing starts or stops on its own.
+    const T_END = 1200; // --dur-4
     const TRIGGER = 0.32; // scroll progress, just after "Operate as one." has settled
     let time = reduce ? T_END : 0; // current position on the timeline
     let target = time;
     let last = 0;
     let playing = false;
-    const at = (t: number, [a, b]: number[]) => hamsaEase(clamp((t - a) / (b - a)));
+    const smooth = (v: number) => { const x = clamp(v); return x * x * (3 - 2 * x); };
+    const win = (u: number, a: number, b: number) => smooth((u - a) / (b - a));
 
     const render = () => {
       const stage = root.firstElementChild as HTMLElement;
@@ -63,42 +63,45 @@ import { asset } from '../lib/asset';
       const p = reduce ? 1 : clamp(-root.getBoundingClientRect().top / total);
 
       const tText = seg(p, 0.06, 0.2); // phrase 1 → phrase 2 (scroll-driven)
-      const tCard = at(time, T_CARD); // full bleed → card
-      const tRing = at(time, T_RING); // card shrinks, still solid, into the pill shape
-      const tHole = at(time, T_HOLE); // the centre opens from the middle out, leaving the photo ring
-      const tPill = at(time, T_PILL); // ring → outline pill
+      const u = hamsaEase(time / T_END); // the one eased progress (settles just past 1)
+      const tRound = win(u, 0, 0.3); // corners round up to the pill radius
+      const tRingTex = win(u, 0.2, 0.5); // cross-fade to Figma's ring texture
+      const tHole = win(u, 0.35, 0.7); // the centre opens from the middle out, leaving the photo ring
+      const tOut = win(u, 0.7, 1); // photo ring thins and fades as the black outline arrives
 
       const full: Box = { ...FULL, w: W / k, h: H / k };
-      let b: Box;
-      if (tRing === 0) b = mix(full, CARD, tCard);
-      else if (tPill === 0) b = mix(CARD, RING, tRing);
-      else b = mix(RING, PILL, tPill);
-      // (b.ring is ignored below: the hole's own phase draws the ring.)
+      const w = Math.max(0, lerp(full.w, PILL.w, u));
+      const h = Math.max(0, lerp(full.h, PILL.h, u));
+      const r = PILL.r * tRound;
 
-      media.style.width = `${b.w * k}px`;
-      media.style.height = `${b.h * k}px`;
-      media.style.borderRadius = `${b.r * k}px`;
-      media.style.opacity = String(1 - tPill);
-      media.style.setProperty('--ring-o', String(tRing)); // Figma uses a separate texture for the ring
-      // The hole grows from a sliver in the middle to the final 30px ring, so the photo never turns see-through.
-      const ringInset = RING.ring * k * (tPill > 0 ? 1 - tPill : 1);
-      const collapsed = (Math.min(b.w, b.h) * k) / 2;
-      const inset = tPill > 0 ? ringInset : collapsed + (ringInset - collapsed) * tHole;
+      media.style.width = `${w * k}px`;
+      media.style.height = `${h * k}px`;
+      media.style.borderRadius = `${r * k}px`;
+      media.style.opacity = String(1 - tOut);
+      media.style.setProperty('--ring-o', String(tRingTex));
+      const ringInset = RING.ring * k * (1 - tOut);
+      const collapsed = (Math.min(w, h) * k) / 2;
+      const inset = lerp(collapsed, ringInset, tHole);
       hole.style.inset = `${inset}px`;
-      hole.style.borderRadius = `${Math.max(0, b.r * k - inset)}px`;
+      hole.style.borderRadius = `${Math.max(0, r * k - inset)}px`;
       hole.style.opacity = tHole > 0 ? '1' : '0';
       hole.style.backgroundSize = `${W}px ${H}px`; // line up with the stage background
 
-      lines[0].style.opacity = String((1 - tText) * (1 - tCard));
-      lines[1].style.opacity = String(tText * (1 - tCard));
-      // Once the ring is complete, "Request a demo" plays in word by word (CSS transition on the class).
-      const ctaIn = time >= T_CTA;
+      const tFade = win(u, 0, 0.25);
+      lines[0].style.opacity = String((1 - tText) * (1 - tFade));
+      lines[1].style.opacity = String(tText * (1 - tFade));
+      // As the ring forms, "Request a demo" plays in word by word (CSS transition on the class).
+      const ctaIn = u >= 0.45;
       root.classList.toggle('is-cta-in', ctaIn);
       cta.style.pointerEvents = ctaIn ? 'auto' : 'none';
-      cta.style.width = `${b.w * k}px`;
-      cta.style.height = `${b.h * k}px`;
-      cta.style.borderColor = `rgb(0 0 0 / ${tPill})`;
-      scrim.style.opacity = String(tPill);
+      // The text box stays the final pill size so the words never re-centre (that made them wobble);
+      // only the outline behind them follows the shrinking shape.
+      cta.style.width = `${Math.round(PILL.w * k)}px`;
+      cta.style.height = `${Math.round(PILL.h * k)}px`;
+      cta.style.setProperty('--ow', `${w * k}px`);
+      cta.style.setProperty('--oh', `${h * k}px`);
+      cta.style.setProperty('--oa', String(tOut));
+      scrim.style.opacity = String(tOut);
 
       // Crossing the trigger point starts the timeline; crossing back reverses it.
       if (!reduce) {
@@ -119,13 +122,6 @@ import { asset } from '../lib/asset';
       if (time !== target) requestAnimationFrame(tick);
       else playing = false;
     };
-
-    const mix = (a: Box, b: Box, t: number): Box => ({
-      w: lerp(a.w, b.w, t),
-      h: lerp(a.h, b.h, t),
-      r: lerp(a.r, b.r, t),
-      ring: lerp(a.ring, b.ring, t),
-    });
 
     let queued = false;
     const onScroll = () => {
@@ -198,7 +194,6 @@ import { asset } from '../lib/asset';
     position: relative;
     display: grid;
     place-items: center;
-    border: 2px solid transparent;
     border-radius: 100px;
     color: #000;
     font-size: 48px;
@@ -206,7 +201,21 @@ import { asset } from '../lib/asset';
     line-height: 48px;
     transition: background-color var(--dur-1) var(--ease-hamsa), color var(--dur-1) var(--ease-hamsa);
   }
-  .flock__words { display: inline-flex; gap: 0.25em; }
+  /* The outline: follows the shape during the motion, while the text box itself never changes size. */
+  .flock__cta::before {
+    content: '';
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    z-index: -1;
+    width: var(--ow, 100%);
+    height: var(--oh, 100%);
+    transform: translate(-50%, -50%);
+    border: 2px solid rgb(0 0 0 / var(--oa, 0));
+    border-radius: 100px;
+    transition: background-color var(--dur-1) var(--ease-hamsa);
+  }
+  .flock__words { display: inline-flex; gap: 0.25em; position: relative; top: -4px; }
   .flock__word { display: inline-block; overflow: hidden; padding-bottom: 0.08em; margin-bottom: -0.08em; }
   .flock__word > span {
     display: inline-block;
@@ -222,7 +231,8 @@ import { asset } from '../lib/asset';
     .flock__word > span, .flock.is-cta-in .flock__word > span { transition: none; }
   }
   /* Solid black on hover: over the photo ring, the 85% fill used by other pills would let the image show through. */
-  .flock__cta:hover, .flock__cta:focus-visible { background: #000; color: #fff; }
+  .flock__cta:hover, .flock__cta:focus-visible { color: #fff; }
+  .flock__cta:hover::before, .flock__cta:focus-visible::before { background: #000; }
   .flock__scrim {
     position: absolute;
     inset: 0;
