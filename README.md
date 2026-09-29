@@ -1,29 +1,27 @@
-# Hamsa — landing page
+# Hamsa OS
 
-Static landing page built with [Astro](https://astro.build), from the Hamsa homepage Figma file.
+A company operating system for **Hamsa**: one place for the brand, the messaging and everything built from them.
+The website is one project inside it. Future work (decks, campaigns, sales material, new pages) should draw on the same
+brand and messaging sources, so everything stays consistent.
 
-## Develop
+## What's where
 
-```sh
-npm install
-npm run dev      # http://localhost:4321
-npm run build    # outputs static site to dist/
-npm run preview  # serve the built site locally
-```
+| Folder | What it holds |
+|---|---|
+| [`brand/`](brand/) | Visual identity: colours, typography, shapes, imagery, logos and font files |
+| [`messaging/`](messaging/) | Positioning, audience, tone, product vocabulary, proof points and approved copy |
+| [`site/`](site/) | The hamsa.com homepage, built from the Figma design (Astro static site) |
+| [`CLAUDE.md`](CLAUDE.md) | Instructions for AI assistants working in this repo |
 
-## Structure
+## Sources of truth
 
-- `src/pages/index.astro` — the homepage, composed of section components
-- `src/components/` — one component per Figma section (hero, features, …)
-- `src/styles/global.css` — design tokens (colors, type, spacing) pulled from Figma
-- `public/` — static assets (images, fonts, favicon)
+1. **Figma**, "Hamsa homepage" (page R3), for the 2026 design and copy.
+2. **`brand/` and `messaging/`**, which summarise that design and the current hamsa.com into reusable rules and copy.
+3. Everything else (the site, future projects) is built from 1 and 2.
 
-## Previews & deploy (Cloudflare Pages)
+When copy or brand rules change, update `brand/` or `messaging/` first, then the projects that use them.
 
-Connect this repo in Cloudflare → Workers & Pages → Create → Pages → Connect to Git:
+## The website
 
-- Framework preset: **Astro**
-- Build command: `npm run build`
-- Output directory: `dist`
-
-Every branch/PR then gets its own preview URL, and `main` deploys to production.
+Live preview: https://blacksmithooo.github.io/hamsa_os/ (updates automatically on every push to `main`).
+See [`site/README.md`](site/README.md) for how to run and build it.

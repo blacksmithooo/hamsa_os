@@ -115,7 +115,6 @@ const columns = [
     border-radius: 10px;
     background: rgb(255 255 255 / 0.05);
     backdrop-filter: blur(25px);
-    -webkit-backdrop-filter: blur(25px);
     cursor: default;
     transition: height 450ms var(--ease), background-color 300ms ease;
   }
@@ -190,5 +189,10 @@ const columns = [
     .app__rule, .app__icon { display: none; }
     .app__text { position: static; width: auto; margin-top: 12px; }
     .apps__cta { position: relative; left: auto; top: auto; transform: none; margin-top: 32px; }
+  }
+
+  /* Older Safari (15–17) only understands the prefixed property. */
+  @supports not (backdrop-filter: none) {
+    .app { -webkit-backdrop-filter: blur(25px); }
   }
 </style>
