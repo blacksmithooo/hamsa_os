@@ -64,10 +64,38 @@ const total = String(people.length).padStart(2, '0');
     // Slot of slide k relative to the active one, wrapped into −2…3 so the strip loops.
     const slot = (k: number) => ((((k - active) % n) + n + 2) % n) - 2;
 
-    const render = (animate: boolean) => {
+    // Card that wraps to the other end of the strip: it's pulled out quickly past the screen edge in the
+    // direction of travel (exit curve, --dur-2 × 0.75), then glides in from the opposite edge to its new slot
+    // (--dur-3), landing just after the other cards have slid over. One animation, so rapid clicks can cancel it.
+    const css = getComputedStyle(document.documentElement);
+    const EXIT = 300;
+    const ENTER = 800;
+    const wrap = (el: HTMLElement, now: number, to: number, dir: number) => {
+      const r = el.getBoundingClientRect();
+      const base = r.left - now; // page x of the card with no transform
+      const offLeft = -base - r.width - 40;
+      const offRight = innerWidth - base + 40;
+      const [out, back] = dir > 0 ? [offLeft, offRight] : [offRight, offLeft];
+      const total = EXIT + ENTER;
+      el.animate(
+        [
+          { transform: `translateX(${now}px)`, easing: css.getPropertyValue('--ease-hamsa-exit').trim() || 'ease-in' },
+          { transform: `translateX(${out}px)`, offset: EXIT / total, easing: 'step-end' },
+          { transform: `translateX(${back}px)`, offset: EXIT / total + 0.0001, easing: css.getPropertyValue('--ease-hamsa').trim() || 'ease-out' },
+          { transform: `translateX(${to}px)` },
+        ],
+        { duration: total },
+      );
+    };
+
+    const render = (animate: boolean, dir = 0) => {
       slides.forEach((el, k) => {
         const s = slot(k);
-        const jump = Math.abs(s - offsets[k]) > 1; // wrapped to the other end: move without animating
+        const jump = Math.abs(s - offsets[k]) > 1; // wrapped to the other end of the strip
+        const now = new DOMMatrix(getComputedStyle(el).transform).m41; // where it is right now (may be mid-move)
+        // Cancel an earlier wrap still in flight (not the CSS slide transitions, which carry on smoothly).
+        el.getAnimations().forEach((a) => { if (!(a instanceof CSSTransition)) a.cancel(); });
+        if (animate && jump) wrap(el, now, s * STEP, dir);
         el.style.transition = animate && !jump ? '' : 'none';
         el.style.transform = `translateX(${s * STEP}px)`;
         el.classList.toggle('is-active', s === 0);
@@ -78,7 +106,7 @@ const total = String(people.length).padStart(2, '0');
     };
     const go = (d: number) => {
       active = (active + d + n) % n;
-      render(true);
+      render(!matchMedia('(prefers-reduced-motion: reduce)').matches, Math.sign(d));
     };
     root.querySelector('[data-prev]')!.addEventListener('click', () => go(-1));
     root.querySelector('[data-next]')!.addEventListener('click', () => go(1));
