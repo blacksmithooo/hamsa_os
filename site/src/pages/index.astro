@@ -37,7 +37,8 @@ import SiteFooter from '../components/SiteFooter.astro';
   :global(.footer) { margin-top: 206px; }
 
   @media (max-width: 1100px) {
-    .page > :global(*) { margin-top: 64px; }
+    /* Same specificity as the desktop gaps above (a bare * would lose to them). */
+    .page > :global(:is(.assets, .stack, .apps, .stats, .team, .clients)) { margin-top: 64px; }
     .page > :global(.hero), .page > :global(.flock) { margin-top: 0; }
     :global(.footer) { margin-top: 64px; }
   }

@@ -206,5 +206,16 @@ const stats = [
       gap: 16px;
     }
     .stats__note { position: static; margin-top: 48px; font-size: 16px; line-height: 1.3; }
+    /* The tiles sit below the headline here rather than over it, so the headline stays sharp. */
+    .stats .stats__copy { filter: none; opacity: 1; }
+    .stats__tiles { margin-top: 40px; }
+  }
+
+  /* Touch screens can't hover, so the figures are always shown: coloured on the grey tile, with the label below. */
+  @media (hover: none) {
+    .tile__label { opacity: 0; }
+    .tile__detail { opacity: 1; background: none; color: var(--c); }
+    .tile__value { font-size: 40px; line-height: 40px; inset: auto 12px 64px; }
+    .tile__caption { font-size: 12px; line-height: 13px; letter-spacing: 1.2px; inset: auto 12px 18px; }
   }
 </style>
