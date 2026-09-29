@@ -34,28 +34,30 @@ const stats = [
 </section>
 
 <script>
-  // Arm the "a" state only when JS runs (no-JS visitors see the revealed tiles), reveal when the section
-  // comes into view, and undo it when scrolling back up above it (so the headline sharpens again).
-  // Desktop: the section is one screen tall, so reveal once 60% of it is visible. Narrow screens: the section
-  // is taller than the screen, so reveal once the tiles pass 70% of the way up the screen.
+  // Arm the "a" state only when JS runs (no-JS visitors see the revealed tiles). The reveal (tiles in, headline
+  // blurred) holds only while the section is fully on screen: it waits for the section to arrive, and undoes
+  // itself as soon as the section starts to leave, scrolling either way. On narrow screens the section is taller
+  // than the screen, so the tiles are used instead. Anything taller than the screen counts as "in" while its
+  // middle is in the middle of the screen.
   const narrow = matchMedia('(max-width: 1180px)');
   document.querySelectorAll<HTMLElement>('[data-stats]').forEach((el) => {
     el.classList.add('is-armed');
-    let io: IntersectionObserver | undefined;
-    const watch = () => {
-      io?.disconnect();
-      const target = narrow.matches ? el.querySelector<HTMLElement>('.stats__tiles')! : el;
-      io = new IntersectionObserver(
-        ([entry]) => {
-          if (entry.isIntersecting) el.classList.add('is-revealed');
-          else if (entry.boundingClientRect.top > 0) el.classList.remove('is-revealed'); // back above it, not past it
-        },
-        narrow.matches ? { rootMargin: '0px 0px -30% 0px' } : { threshold: 0.6 },
-      );
-      io.observe(target);
+    const tiles = el.querySelector<HTMLElement>('.stats__tiles')!;
+    let queued = false;
+    const update = () => {
+      queued = false;
+      const r = (narrow.matches ? tiles : el).getBoundingClientRect();
+      const H = innerHeight;
+      const TOL = narrow.matches ? 60 : 24; // px of slack, so a sliver off the edge doesn't count as leaving
+      const inView = r.height <= H
+        ? r.top >= -TOL && r.bottom <= H + TOL
+        : Math.abs(r.top + r.height / 2 - H / 2) < H * 0.2;
+      el.classList.toggle('is-revealed', inView);
     };
-    watch();
-    narrow.addEventListener('change', watch);
+    const onScroll = () => { if (!queued) { queued = true; requestAnimationFrame(update); } };
+    addEventListener('scroll', onScroll, { passive: true });
+    addEventListener('resize', onScroll);
+    update();
   });
 </script>
 
