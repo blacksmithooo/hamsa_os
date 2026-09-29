@@ -8,15 +8,17 @@ brand and messaging sources, so everything stays consistent.
 
 | Folder | What it holds |
 |---|---|
-| [`brand/`](brand/) | Visual identity: colours, typography, shapes, imagery, logos and font files |
+| [`brand/`](brand/) | Brand guidelines (logo, colour, type, grid, imagery, how to apply them), logos, icons, reference images, fonts |
 | [`messaging/`](messaging/) | Positioning, audience, tone, product vocabulary, proof points and approved copy |
-| [`site/`](site/) | The hamsa.com homepage, built from the Figma design (Astro static site) |
+| [`site/`](site/) | The new Hamsa homepage, built from the Figma design (Astro static site) |
 | [`CLAUDE.md`](CLAUDE.md) | Instructions for AI assistants working in this repo |
 
 ## Sources of truth
 
-1. **Figma**, "Hamsa homepage" (page R3), for the 2026 design and copy.
-2. **`brand/` and `messaging/`**, which summarise that design and the current hamsa.com into reusable rules and copy.
+1. **Figma**, "Hamsa homepage" (Components, Cover and page R3), for the new brand, design and copy. Hamsa is
+   rebranding: nothing visual or verbal from the old hamsa.com carries over. The old site is used only for background
+   facts about the company.
+2. **`brand/` and `messaging/`**, which turn that design into reusable rules and copy.
 3. Everything else (the site, future projects) is built from 1 and 2.
 
 When copy or brand rules change, update `brand/` or `messaging/` first, then the projects that use them.

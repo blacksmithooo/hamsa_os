@@ -1,9 +1,15 @@
 # Hamsa: company and positioning
 
+Sources: the 2026 Figma design is the source of truth for positioning, wording and tone (Hamsa is rebranding).
+Background facts about the company (what it does, who it serves, reported numbers) come from hamsa.com. Nothing else
+from the old site (headlines, calls to action, taglines, look and feel) should be reused.
+
 ## What Hamsa is
 
-Hamsa builds financial-market infrastructure: a **Unified Ledger** that uses AI and distributed-ledger technology for
-faster, safer, lower-cost clearing and settlement between financial institutions.
+*Background, from hamsa.com:* Hamsa builds financial-market infrastructure: a **Unified Ledger** that uses AI and
+distributed-ledger technology for faster, safer, lower-cost clearing and settlement between financial institutions. Its
+technology includes zero-knowledge privacy and smart-contract automation, and it works alongside existing systems rather
+than replacing them.
 
 The 2026 positioning frames this as **"the unified operating system for capital markets"**: one platform that combines
 AI, reusable financial services and a unified ledger, so institutions stop building operational infrastructure and
@@ -11,8 +17,9 @@ build differentiated products instead.
 
 ## Audience
 
-- Central banks and Tier-1 financial institutions (e.g. Brazil's DREX pilot)
-- Brokerages, fund administrators and wealth-management platforms (the 2026 stats come from a Tier 1 brokerage)
+- Central banks and Tier-1 financial institutions; Hamsa has worked on Brazil's DREX pilot (from hamsa.com)
+- Brokerages, fund companies and wealth-management platforms (the 2026 design's stats come from a Tier 1 brokerage, and
+  the team section speaks to "wealth-management, brokerage, settlement and subaccounting platforms")
 
 ## Problems solved
 
@@ -52,24 +59,20 @@ Primary call to action: **Request a demo**. Secondary: **Explore applications**.
 | 130+ | Fund companies | 2026 homepage (same) |
 | $100M+ | Forecasted operating cost savings | 2026 homepage (same) |
 | $500M+ | Forecasted incremental revenue | 2026 homepage (same) |
-| $400B+ | Transactions processed | Current hamsa.com |
-| $3.2B | Assets tokenized | Current hamsa.com |
+| $400B+ | Transactions processed | hamsa.com (check it's still current before use) |
+| $3.2B | Assets tokenized | hamsa.com (check it's still current before use) |
 
 Always pair the 2026 figures with the footnote: *"Business-impact figures are ten-year forecasts provided by a Tier 1
 brokerage institution."*
 
 Clients and partners shown: Microsoft, Banco ABC Brasil, Safra National Bank, Cyberport, Banco Central do Brasil.
 
-## Tone
+## Tone (from the 2026 design copy)
 
-Professional, forward-looking, technical but accessible; institutional trust. Short declarative sentences, often in
-pairs ("Stay private locally. Connect globally."). Speaks to operators, not to technologists.
-
-## Current hamsa.com (reference)
-
-- Site title: "Hamsa – Powering the Finternet"
-- Headlines: "Bringing Finance In Sync", "Modernizing the Infrastructure of Global Capital Markets", "Trust, Built-In"
-- Core modules: Privacy (ZK-based), Automation (smart contracts), Interoperability, Programmability
-- Solutions: Subaccounting Platform, Programmable Payments, Asset Tokenization
-- Primary CTA: "Build the future with Hamsa" (contact form)
-- Nav: Infrastructure, Solutions, Resources (DREX & Beyond), About Us, Newsroom, LinkedIn, X/Twitter
+- **Confident and plain.** Short declarative sentences, full stops, no exclamation marks, no hype words.
+- **Pairs and contrasts.** Ideas come in twos: "Stay private locally. Connect globally." / "Keep your data private.
+  Connect to everyone." / "Stop building infrastructure. Build what's next."
+- **Speaks to operators.** Imperatives aimed at the people who run the business ("Stop building…", "Build anything.",
+  "Operate as one."), about outcomes (books, settlement, revenue), not technology for its own sake.
+- **Concrete.** Numbers as figures with units ("19M", "$100M+", "24/7"), named products, named clients.
+- **Understated sign-offs.** One clear call to action: "Request a demo".

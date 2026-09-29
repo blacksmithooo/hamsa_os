@@ -5,7 +5,9 @@ This repo is Hamsa's company OS: brand, messaging and the projects built from th
 - Before writing anything customer-facing (copy, decks, emails, pages), read `messaging/company.md` for positioning and
   tone, and `messaging/homepage-2026.md` for approved wording. Reuse approved lines rather than inventing new claims.
 - Proof points must match `messaging/company.md`. The 2026 figures are ten-year forecasts and must carry their footnote.
-- For anything visual, follow `brand/identity.md` (Degular, the navy → pink → gold ramp, starling imagery).
+- For anything visual, follow `brand/guidelines.md` and look at `brand/reference/` first. Hamsa is rebranding: the
+  Figma file is the only source for the look. Never reuse colours, fonts, layouts, imagery or headlines from the old
+  hamsa.com; it may only be used for background facts about the company.
 - Don't present missing content (e.g. team bios marked "not written yet") as real; flag it instead.
 - Update `brand/` or `messaging/` first when rules or copy change, then the projects that use them.
 

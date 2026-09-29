@@ -1,7 +1,14 @@
 # Brand
 
-Hamsa's visual identity.
+Hamsa's new visual identity, taken from the Figma file "Hamsa homepage" (the source of truth; Hamsa is rebranding, so
+nothing from the old hamsa.com applies).
 
-- [`identity.md`](identity.md): typography, colour, gradient, shapes, imagery and logo usage
-- [`logos/`](logos/): SVG logos exported from the Figma file
-- [`fonts/`](fonts/): Degular **trial** files (letters and numbers only; not licensed for publishing, see `identity.md`)
+- [`guidelines.md`](guidelines.md): **start here.** Logo, colour, typography, grid, spacing, shapes, imagery, motion,
+  and recipes for applying them to business cards, emails, newsletters, slides and social posts
+- [`reference/`](reference/): images of the real designs (homepage, sections, cover, logo and icon sheet)
+- [`logos/`](logos/): horizontal and vertical lockups in the four colourways (Black, White, Cerise, Light Gray), the mark and the wordmark
+- [`icons/`](icons/): the ten gradient product icons (A–I and Hamsa AI)
+- [`fonts/`](fonts/): Degular **trial** files (letters and numbers only; not licensed for publishing)
+
+Vertical lockups and icons are 2× PNG renders from Figma for now; SVG versions can be exported from Figma when the API
+allows (the free plan hit its rate limit).
