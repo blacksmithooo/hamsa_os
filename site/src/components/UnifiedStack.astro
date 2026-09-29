@@ -206,10 +206,17 @@ const layers = [
     .stack__panel { display: none; }
     .stack__os { position: static; margin-top: 48px; padding: 24px; border-radius: 20px; background: linear-gradient(112deg, #3b3b61, #d2506a 50%, #ffc34a); }
     .stack__layers { display: grid; gap: 16px; margin-top: 16px; }
-    .layer { position: relative; left: auto; top: auto; width: auto; height: auto; margin: 0; padding: 24px; opacity: 1 !important; transform: none !important; }
+    .layer { position: relative; left: auto; top: auto; width: auto; height: auto; margin: 0; padding: 32px 28px 28px; opacity: 1 !important; transform: none !important; }
     .layer > * { position: static !important; width: auto !important; }
-    .layer__body { margin-top: 16px; }
-    .layer__icon { margin-top: 16px; }
+    /* Stacked text needs more air than the side-by-side desktop card: space under the title and subtitle,
+       a clear gap between paragraphs, and a little room under each pink lead-in. */
+    .layer__sub { margin-top: 12px; line-height: 20px; }
+    .layer__body { margin-top: 28px; line-height: 22px; }
+    .layer__body p + p { margin-top: 20px; }
+    .layer__body strong { display: block; margin-bottom: 4px; }
+    .layer__body br { display: none; } /* the block lead-in already breaks the line */
+    .layer__icon { margin-top: 32px; }
+    .layer__n { display: block; margin-top: 14px; }
     .layer__rule, .stack__arrows { display: none; }
   }
 </style>
