@@ -116,5 +116,13 @@ const columns = [
     .footer__col ul { width: auto; }
     .footer__col a { font-size: 19px; line-height: 19px; }
     .footer__wordmark { width: 100%; margin-top: 48px; }
+    /* The desktop scrim is in Figma pixels for an 1880px footer. Here the footer is shorter, so the fade is set
+       in percentages (same proportions) and the photo is cropped rather than stretched. Otherwise the photo's
+       white bottom edge showed through the unfinished fade as a pale band behind the wordmark. */
+    .footer__bg {
+      background:
+        linear-gradient(180deg, rgb(49 49 80 / 0) 62%, #313150 85%),
+        var(--sky) center top / cover no-repeat;
+    }
   }
 </style>
