@@ -110,13 +110,15 @@ button { font: inherit; color: inherit; }
 .pill-fill {
   position: absolute;
   inset: var(--pill-fill-inset, -2px);
-  border-radius: inherit;
+  /* Mask and black pill share one explicit radius (half the mask's height). Inheriting a radius that's too big for
+     the box lets the browser shrink it differently for each (the pill is taller), so the curves wouldn't match. */
+  border-radius: var(--pill-r, 31.25px); /* .pill: (58.5px + 2 × 2px) / 2 */
   overflow: hidden;
   pointer-events: none;
 }
 .pill-label { position: absolute; inset: 0; display: grid; place-items: center; white-space: nowrap; }
 .pill-label, .pill-fill__pill { transition: transform calc(var(--dur-2) * 0.75) var(--ease-hamsa-exit); }
-.pill-fill__pill { position: absolute; inset: 0 0 -10% 0; border-radius: inherit; background: #000; transform: translateY(101%); }
+.pill-fill__pill { position: absolute; inset: 0 0 -10% 0; border-radius: var(--pill-r, 31.25px); background: #000; transform: translateY(101%); }
 .pill-fill__text { position: absolute; inset: 0 0 calc(100% / 11) 0; display: grid; place-items: center; color: #fff; white-space: nowrap; }
 :is(.pill, [data-pill-fill]):is(:hover, :focus-visible) :is(.pill-label, .pill-fill__pill) {
   transform: none;
