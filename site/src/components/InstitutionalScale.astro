@@ -35,8 +35,8 @@ const stats = [
 
 <script>
   // Arm the "a" state only when JS runs (no-JS visitors see the revealed tiles). The reveal (tiles in, headline
-  // blurred) holds only while the section is fully on screen: it waits for the section to arrive, and undoes
-  // itself as soon as the section starts to leave, scrolling either way. On narrow screens the section is taller
+  // blurred) waits for the section to be fully on screen, stays as you scroll on down, and undoes itself only when
+  // you scroll back up past the section. On narrow screens the section is taller
   // than the screen, so the tiles are used instead. Anything taller than the screen counts as "in" while its
   // middle is in the middle of the screen.
   const narrow = matchMedia('(max-width: 1180px)');
@@ -52,7 +52,10 @@ const stats = [
       const inView = r.height <= H
         ? r.top >= -TOL && r.bottom <= H + TOL
         : Math.abs(r.top + r.height / 2 - H / 2) < H * 0.2;
-      el.classList.toggle('is-revealed', inView);
+      // Reveal once fully in view, then keep it while scrolling on down (even after it leaves the top). Only undo it
+      // when scrolling back up past it, i.e. once it starts dropping off the bottom of the screen again.
+      if (inView) el.classList.add('is-revealed');
+      else if (r.bottom > H + TOL) el.classList.remove('is-revealed');
     };
     const onScroll = () => { if (!queued) { queued = true; requestAnimationFrame(update); } };
     addEventListener('scroll', onScroll, { passive: true });
