@@ -17,7 +17,7 @@ import { asset } from '../lib/asset';
     </div>
     <p class="flock__line" data-line="0">Don't sacrifice privacy.</p>
     <p class="flock__line" data-line="1">Operate as one.</p>
-    <a class="flock__cta" href="#contact" data-cta aria-label="Request a demo"><span class="flock__words" aria-hidden="true">{['Request', 'a', 'demo'].map((w, i) => <span class="flock__word"><span style={`--i: ${i}`}>{w}</span></span>)}</span></a>
+    <a class="flock__cta" href="#contact" data-cta aria-label="Request a demo"><span class="flock__words" aria-hidden="true">{['Request', 'a', 'demo'].map((w, i) => <span class="flock__word"><span style={`--i: ${i}`}>{w}</span></span>)}</span><span class="flock__fill" aria-hidden="true"><span class="flock__fill-pill"><span class="flock__fill-text"><span class="flock__words">{['Request', 'a', 'demo'].map((w) => <span>{w}</span>)}</span></span></span></span></a>
     <div class="flock__scrim" data-scrim aria-hidden="true"></div>
   </div>
 </section>
@@ -248,8 +248,32 @@ import { asset } from '../lib/asset';
     .flock__word > span, .flock.is-cta-in .flock__word > span { transition: none; }
   }
   /* Solid black on hover: over the photo ring, the 85% fill used by other pills would let the image show through. */
-  .flock__cta:hover, .flock__cta:focus-visible { color: #fff; }
-  .flock__cta:hover::before, .flock__cta:focus-visible::before { background: #000; }
+  /* Hover: a black pill slides in from the left inside the pill-shaped mask, and back out on roll-off. It carries
+     a white copy of the words that stays put (counter-moving), so the text turns white exactly where the black has
+     reached. (Fading the fill and the text colour together made the white text vanish mid-fade: the flicker.) */
+  .flock__fill {
+    position: absolute;
+    inset: 0;
+    border-radius: 100px;
+    overflow: hidden;
+    pointer-events: none;
+  }
+  .flock__fill-pill, .flock__fill-text {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    transition: transform calc(var(--dur-2) * 0.75) var(--ease-hamsa-exit);
+  }
+  .flock__fill-pill { border-radius: inherit; background: #000; overflow: hidden; transform: translateX(-101%); }
+  .flock__fill-text { color: #fff; transform: translateX(101%); }
+  .flock__cta:is(:hover, :focus-visible) :is(.flock__fill-pill, .flock__fill-text) {
+    transform: none;
+    transition: transform var(--dur-2) var(--ease-hamsa);
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .flock__fill-pill, .flock__fill-text, .flock__cta:is(:hover, :focus-visible) :is(.flock__fill-pill, .flock__fill-text) { transition: none; }
+  }
   .flock__scrim {
     position: absolute;
     inset: 0;
