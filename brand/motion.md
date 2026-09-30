@@ -41,6 +41,14 @@ with `lerp: 0.1` (each frame the page covers 10% of the remaining distance; a fl
 Mouse wheel and trackpad only; touch scrolling stays native. Turned off for reduced motion, and paused while the menu
 is open. Implemented in `site/src/lib/smooth-scroll.ts`.
 
+## Buttons
+
+Every pill button (outline pill, black text) has the same hover, everywhere: a black pill slides in from the left
+inside the button's own outline, over `--dur-2` on `--ease-hamsa`, and slides back out to the left on roll-off (75% of
+the time, `--ease-hamsa-exit`). The label turns white exactly where the black has reached (a white copy of the label
+rides inside the black pill). Never cross-fade the fill and the text colour: halfway through, white text on a
+half-grey pill disappears and reads as a flicker. On the site this is `.pill` / `data-pill-fill` (`src/lib/pill-fill.ts`).
+
 ## Values
 
 ### The curve's shape

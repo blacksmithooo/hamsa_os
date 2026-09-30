@@ -94,7 +94,34 @@ button { font: inherit; color: inherit; }
   cursor: pointer;
   transition: background-color var(--dur-1) var(--ease-hamsa), color var(--dur-1) var(--ease-hamsa);
 }
-.pill:hover, .pill:focus-visible { background: rgb(0 0 0 / 0.85); color: #fff; }
+/* Button hover, site-wide (markup added by src/lib/pill-fill.ts): a black pill slides in from the left inside the
+   button's pill-shaped mask (--dur-2, enter curve) and back out on roll-off (75%, exit curve). A white copy of the
+   label rides inside it, counter-moving so it stays put: the text turns white exactly where the black has reached.
+   (Fading the fill and the text colour together made the white text vanish mid-fade, which read as a flicker.) */
+.pill { position: relative; --pill-fill-inset: -2px; } /* cover the 2px outline too */
+.pill-fill {
+  position: absolute;
+  inset: var(--pill-fill-inset, 0);
+  border-radius: inherit;
+  overflow: hidden;
+  pointer-events: none;
+}
+.pill-fill__pill, .pill-fill__text {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  transition: transform calc(var(--dur-2) * 0.75) var(--ease-hamsa-exit);
+}
+.pill-fill__pill { border-radius: inherit; background: #000; overflow: hidden; transform: translateX(-101%); }
+.pill-fill__text { color: #fff; white-space: nowrap; transform: translateX(101%); }
+:is(.pill, [data-pill-fill]):is(:hover, :focus-visible) :is(.pill-fill__pill, .pill-fill__text) {
+  transform: none;
+  transition: transform var(--dur-2) var(--ease-hamsa);
+}
+@media (prefers-reduced-motion: reduce) {
+  .pill-fill__pill, .pill-fill__text { transition: none !important; }
+}
 .pill:focus-visible { outline: 2px solid var(--stat-1); outline-offset: 3px; }
 
 .visually-hidden {
