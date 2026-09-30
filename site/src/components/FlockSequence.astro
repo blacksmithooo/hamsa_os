@@ -263,8 +263,11 @@ import { asset } from '../lib/asset';
   .flock__cta > .flock__words { transition: transform calc(var(--dur-2) * 0.75) var(--ease-hamsa-exit); }
   .flock__cta:is(:hover, :focus-visible) > .flock__words {
     transform: translateY(calc(var(--h) * -1.111));
-    transition: transform var(--dur-2) var(--ease-hamsa);
+    transition: transform var(--dur-2) var(--ease-hamsa-bold);
   }
+  /* At this size the standard 2% settle is only ~2.5px and reads as a jitter, so this button rolls in on the
+     bold variant (~6%, a visible bounce). */
+  .flock__cta:is(:hover, :focus-visible) .pill-fill__pill { transition-timing-function: var(--ease-hamsa-bold); }
   .flock__scrim {
     position: absolute;
     inset: 0;

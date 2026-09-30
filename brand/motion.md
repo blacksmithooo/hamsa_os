@@ -51,6 +51,13 @@ extra hidden below, so the curve's overshoot never shows a gap. Never cross-fade
 through, white text on a half-grey pill disappears and reads as a flicker. On the site this is `.pill` /
 `data-pill-fill` (`src/lib/pill-fill.ts`).
 
+### Bold variant, for large elements only
+
+`--ease-hamsa-bold` is the same Murmuration curve with three times the settle (about 6% overshoot instead of 2%). On
+very large elements the standard 2% amounts to a couple of pixels and reads as a jitter rather than a bounce; the bold
+variant makes it read as intended. Use it only for that reason, one element at a time (on the site: the big flock
+"Request a demo" pill's hover). Everything else stays on `--ease-hamsa`.
+
 ## Values
 
 ### The curve's shape
