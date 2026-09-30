@@ -76,10 +76,10 @@ const clocks = [
   const openBtn = document.querySelector<HTMLButtonElement>('[data-menu-open]')!;
   const closeBtn = document.querySelector<HTMLButtonElement>('[data-menu-close]')!;
 
-  // Open: diagonal colour swipe from the menu button's corner (--dur-2), then the items drop in
+  // Open: diagonal colour swipe from the menu button's corner (--dur-3), then the items drop in
   // one by one (--stagger apart). Close: the swipe runs back on the exit curve, at 75% of the time.
   const staggered = [...menu.querySelectorAll<HTMLElement>('[data-stagger]')];
-  staggered.forEach((el, i) => el.style.setProperty('--d', `calc(var(--dur-2) * 0.4 + var(--stagger) * ${i})`));
+  staggered.forEach((el, i) => el.style.setProperty('--d', `calc(var(--dur-3) * 0.4 + var(--stagger) * ${i})`));
   let closeTimer = 0;
 
   const setOpen = (open: boolean) => {
@@ -106,7 +106,7 @@ const clocks = [
         menu.scrollTop = 0;
         root.classList.remove('menu-open');
         window.lenis?.start(); // only once the menu has fully closed, together with the scrollbar returning
-      }, 300); // = --dur-2 × 0.75, the exit swipe
+      }, 600); // = --dur-3 × 0.75, the exit swipe
       openBtn.focus({ preventScroll: true });
     }
   };
@@ -226,11 +226,11 @@ const clocks = [
   /* Diagonal swipe: a triangle anchored at the top-right corner whose long edge sweeps across. */
   .menu {
     clip-path: polygon(100% 0, 100% 0, 100% 0);
-    transition: background-color var(--dur-2) var(--ease-hamsa), clip-path calc(var(--dur-2) * 0.75) var(--ease-hamsa-exit);
+    transition: background-color var(--dur-2) var(--ease-hamsa), clip-path calc(var(--dur-3) * 0.75) var(--ease-hamsa-exit);
   }
   .menu.is-open {
     clip-path: polygon(100% 0, -130% 0, 100% 230%);
-    transition: background-color var(--dur-2) var(--ease-hamsa), clip-path var(--dur-2) var(--ease-hamsa);
+    transition: background-color var(--dur-2) var(--ease-hamsa), clip-path var(--dur-3) var(--ease-hamsa);
   }
   .menu [data-stagger] {
     opacity: 0;
