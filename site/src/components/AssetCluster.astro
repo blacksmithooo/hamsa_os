@@ -2,7 +2,7 @@
 // Figma: "Module 2a" (181:2605) and "Module 2b" (181:2543), one 1440×671 section in two states:
 //   2a — "Tokenized Deposits" at half size (blur 4) and "Cash" at quarter size (blur 10), still arriving
 //   2b — all ten circles at full size, forming the cluster
-// Built as a reveal: the two circles grow into place when the section scrolls into view.
+// Built as a reveal: all circles gather into place when the section scrolls into view, the two above last.
 // Each circle's gradient is converted exactly from its Figma handles (they are offset per circle).
 const circles = [
   { label: 'Mutual<br />Funds', x: 923, y: 84, bg: 'linear-gradient(55.1deg, #3b3b61 -187.1px, #d2506a 63.4px, #ffc34a 313.9px)' },
@@ -15,6 +15,10 @@ const circles = [
   { label: 'Tokenized<br />Deposits', x: 1074, y: 349, bg: 'linear-gradient(55.1deg, #3b3b61 -220.1px, #d2506a 31.6px, #ffc34a 283.3px)', arrive: 'near' },
   { label: 'Stablecoins', x: 923, y: 437, bg: 'linear-gradient(55.1deg, #3b3b61 -186.3px, #d2506a 66.3px, #ffc34a 318.8px)' },
 ];
+// Arrival order: the centre circle first, then outwards by distance; the two Figma "arriving" circles come last.
+const cx = 923, cy = 261;
+const order = [...circles]
+  .sort((a, b) => (a.arrive ? 1 : 0) - (b.arrive ? 1 : 0) || Math.hypot(a.x - cx, a.y - cy) - Math.hypot(b.x - cx, b.y - cy));
 ---
 <section class="assets" data-reveal>
   <div class="assets__copy">
@@ -28,7 +32,7 @@ const circles = [
 
   <ul class="assets__cluster" aria-label="Asset classes on the Unified Ledger">
     {circles.map((c) => (
-      <li class:list={['circle', c.arrive && `circle--${c.arrive}`]} style={`left:${c.x}px; top:${c.y}px; background:${c.bg}`}>
+      <li class:list={['circle', c.arrive && `circle--${c.arrive}`]} style={`left:${c.x}px; top:${c.y}px; background:${c.bg}; --i:${order.indexOf(c)}`}>
         <span set:html={c.label} />
       </li>
     ))}
@@ -82,15 +86,18 @@ const circles = [
     font-weight: 500;
     line-height: 20.59px;
     text-align: center;
-    transition: transform var(--dur-4) var(--ease-hamsa), filter var(--dur-4) var(--ease-hamsa);
   }
   /* State 2a: the two arriving circles, before the section is revealed. */
-  .assets.is-armed:not(.is-revealed) .circle--near { transform: scale(0.5); filter: blur(2px); }
-  .assets.is-armed:not(.is-revealed) .circle--far { transform: scale(0.25); filter: blur(5px); }
-  .circle--far { transition-delay: calc(var(--stagger) * 5); }
+  /* Before the reveal every circle is small, blurred and hidden; they gather one after another from the centre
+     outwards (--i), the two Figma "arriving" circles last. */
+  .assets.is-armed:not(.is-revealed) .circle { transform: scale(0.3); filter: blur(8px); opacity: 0; }
+  .assets.is-revealed .circle {
+    transition: transform var(--dur-4) var(--ease-hamsa), filter var(--dur-3) var(--ease-hamsa), opacity var(--dur-3) var(--ease-hamsa);
+    transition-delay: calc(var(--stagger) * 3 * var(--i));
+  }
 
   @media (prefers-reduced-motion: reduce) {
-    .circle { transition: none; }
+    .circle, .assets.is-revealed .circle { transition: none; }
   }
 
   /* Narrower screens: the cluster's own box (x 621–1376, y 84–588 in Figma, 755×504) is centred under the
