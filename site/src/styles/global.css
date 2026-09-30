@@ -48,14 +48,17 @@ html, body { margin: 0; }
 /* While the menu is open, scrolling is locked and the scrollbar removed; the page, nav and menu are
    padded by the scrollbar's width (--sbw, set in SiteHeader) so nothing shifts and the menu colour
    reaches the right edge. */
-html.menu-open { overflow: hidden; }
+/* While the menu is open the page can't scroll. Use overflow: hidden, and make it beat Lenis's paused-state
+   overflow: clip, which breaks position: sticky (pinned sections like the flock would vanish behind the menu, then
+   snap back on close). */
+html.menu-open, html.lenis.lenis-stopped.menu-open { overflow: hidden; }
 html.menu-open body { padding-right: var(--sbw, 0px); }
 body {
   background: var(--color-bg);
   color: var(--color-fg);
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
-  overflow-x: hidden;
+  overflow-x: clip; /* not hidden: that makes body a scroll container when the menu locks <html>, un-pinning sticky sections */
 }
 img { max-width: 100%; display: block; }
 h1, h2, h3, p, ul, ol { margin: 0; }
@@ -100,15 +103,18 @@ button { font: inherit; color: inherit; }
    same distance on the same curve. The black pill is 10% taller than the button (extra hidden below) so the curve's
    overshoot never uncovers a sliver at the bottom. (Cross-fading fill and text colour made the text vanish mid-fade:
    the old flicker.) */
-.pill { position: relative; overflow: hidden; }
-.pill-label { align-self: stretch; display: flex; align-items: center; }
+.pill { position: relative; }
+.pill-spacer { visibility: hidden; } /* the label in flow, invisible: it keeps the button's width */
+/* The mask is the button's outer edge (over the 2px outline), so the black reaches all the way to the edge. The
+   button itself isn't clipped, so its focus ring still shows. */
 .pill-fill {
   position: absolute;
-  inset: 0;
+  inset: var(--pill-fill-inset, -2px);
   border-radius: inherit;
   overflow: hidden;
   pointer-events: none;
 }
+.pill-label { position: absolute; inset: 0; display: grid; place-items: center; white-space: nowrap; }
 .pill-label, .pill-fill__pill { transition: transform calc(var(--dur-2) * 0.75) var(--ease-hamsa-exit); }
 .pill-fill__pill { position: absolute; inset: 0 0 -10% 0; border-radius: inherit; background: #000; transform: translateY(101%); }
 .pill-fill__text { position: absolute; inset: 0 0 calc(100% / 11) 0; display: grid; place-items: center; color: #fff; white-space: nowrap; }
@@ -117,7 +123,7 @@ button { font: inherit; color: inherit; }
   transition: transform var(--dur-2) var(--ease-hamsa);
 }
 /* The label travels exactly as far as the black pill (101% of its 110% height = 111.1% of the label's own height,
-   which equals the fill's). Listed after the shared rule so it wins. */
+   which is the mask's). Listed after the shared rule so it wins. */
 .pill:is(:hover, :focus-visible) .pill-label { transform: translateY(-111.1%); }
 @media (prefers-reduced-motion: reduce) {
   .pill-label, .pill-fill__pill, .flock__cta > .flock__words { transition: none !important; }

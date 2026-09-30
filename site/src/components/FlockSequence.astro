@@ -258,7 +258,8 @@ import { asset } from '../lib/asset';
   /* Solid black on hover: over the photo ring, the 85% fill used by other pills would let the image show through. */
   /* Hover: the site-wide rolling pill (global.css); its markup is inline above so the white copy can reuse the word
      layout. The black words roll up out of the pill by the pill's travel (1.111 × its height, --h from the script). */
-  .flock__cta.is-ready { clip-path: inset(0 round 100px); }
+  .flock__cta { --pill-fill-inset: -1px; } /* 1px past the box, over the outline (drawn separately, can sit a subpixel out) */
+  .flock__cta.is-ready { clip-path: inset(-1px round 100px); }
   .flock__cta > .flock__words { transition: transform calc(var(--dur-2) * 0.75) var(--ease-hamsa-exit); }
   .flock__cta:is(:hover, :focus-visible) > .flock__words {
     transform: translateY(calc(var(--h) * -1.111));
