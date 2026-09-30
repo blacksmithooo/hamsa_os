@@ -51,10 +51,6 @@ const clocks = [
       <li><span data-tz={tz}>--:--</span>&nbsp;&nbsp;({city})</li>
     ))}
   </ul>
-  <ul class="menu__social" data-stagger>
-    <li><a href="https://www.linkedin.com/company/hamsa-finance/" target="_blank" rel="noopener">LinkedIn</a></li>
-    <li><a href="https://x.com/hamsafinance" target="_blank" rel="noopener">X</a></li>
-  </ul>
   <nav class="menu__nav" aria-label="Main">
     {numbered.map((col) => (
       <div class={`menu__col menu__col--${col.label.toLowerCase()}`}>
@@ -320,21 +316,6 @@ const clocks = [
     text-transform: uppercase;
     font-variant-numeric: tabular-nums;
   }
-  /* Social links: same small caps as the clocks, directly under them. */
-  .menu__social {
-    position: absolute;
-    left: 64px;
-    top: 690px;
-    display: flex;
-    gap: 24px;
-    font-size: 11px;
-    font-weight: 600;
-    line-height: 14.6px;
-    letter-spacing: 2.2px;
-    text-transform: uppercase;
-  }
-  .menu__social a { opacity: 1; transition: opacity var(--dur-1) var(--ease-hamsa); }
-  .menu__social a:hover, .menu__social a:focus-visible { opacity: 0.6; }
   .menu__nav {
     position: absolute;
     left: 35.35%; /* Figma x=509 of 1440 */
@@ -395,8 +376,7 @@ const clocks = [
     .menu__col--infrastructure { grid-row: auto; }
     .menu__col--resources { margin-top: 0; }
     .menu__col a { font-size: 32px; line-height: 30px; }
-    .menu__clocks { padding: 8px 24px 20px; }
-    .menu__social { position: static; order: 3; padding: 0 24px 48px; }
+    .menu__clocks { padding: 8px 24px 48px; }
   }
 
   /* Older Safari (15–17) only understands the prefixed property. */
