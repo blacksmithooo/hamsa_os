@@ -22,7 +22,11 @@ const { title = 'Hamsa – Powering the Finternet', description = 'Hamsa builds 
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="description" content={description} />
+    <!-- Hamsa hand, edge to edge. The SVG switches black/white with the browser's light/dark mode; the PNG is for
+         browsers without SVG favicons, and the touch icon is for home screens. -->
+    <link rel="icon" href={asset('favicon-32.png')} sizes="32x32" type="image/png" />
     <link rel="icon" href={asset('favicon.svg')} type="image/svg+xml" />
+    <link rel="apple-touch-icon" href={asset('apple-touch-icon.png')} />
     {ADOBE_FONTS_CSS && <link rel="stylesheet" href={ADOBE_FONTS_CSS} />}
     <title>{title}</title>
   </head>
