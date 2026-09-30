@@ -56,6 +56,10 @@ import { asset } from '../lib/asset';
     let target = time;
     let last = 0;
     let playing = false;
+    // The pill appears mid-screen, often right under a resting cursor. So it only becomes hoverable/clickable once
+    // the animation has finished AND the mouse has moved since; otherwise the hover fill would slide in mid-animation.
+    let moved = false;
+    addEventListener('pointermove', () => { if (!moved) { moved = true; onScroll(); } }, { passive: true });
     const smooth = (v: number) => { const x = clamp(v); return x * x * (3 - 2 * x); };
     const win = (u: number, a: number, b: number) => smooth((u - a) / (b - a));
 
@@ -110,7 +114,8 @@ import { asset } from '../lib/asset';
       // On the way back up the words leave as soon as the reverse starts, not when the shape gets there.
       const ctaIn = u >= 0.45 && (reduce || p >= TRIGGER);
       root.classList.toggle('is-cta-in', ctaIn);
-      cta.style.pointerEvents = ctaIn ? 'auto' : 'none';
+      if (time < T_END) moved = false; // any movement has to happen after the animation ends
+      cta.style.pointerEvents = ctaIn && time >= T_END && moved ? 'auto' : 'none';
       // The text box stays the final pill size so the words never re-centre (that made them wobble);
       // only the outline behind them follows the shrinking shape.
       cta.style.width = `${Math.round(pill.w * k)}px`;

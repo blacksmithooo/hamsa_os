@@ -106,15 +106,17 @@ button { font: inherit; color: inherit; }
   overflow: hidden;
   pointer-events: none;
 }
+/* The black pill is 10% longer than the button, the extra hidden off its left end: the curve's ~2% overshoot (and
+   the exit curve's small dip) would otherwise uncover a sliver on the left. The white label is button-sized and
+   counter-moves by exactly the pill's distance (101% of 110% = 111.1% of its own width), so it stays put. */
 .pill-fill__pill, .pill-fill__text {
   position: absolute;
-  inset: 0;
   display: grid;
   place-items: center;
   transition: transform calc(var(--dur-2) * 0.75) var(--ease-hamsa-exit);
 }
-.pill-fill__pill { border-radius: inherit; background: #000; overflow: hidden; transform: translateX(-101%); }
-.pill-fill__text { color: #fff; white-space: nowrap; transform: translateX(101%); }
+.pill-fill__pill { inset: 0 0 0 -10%; border-radius: inherit; background: #000; overflow: hidden; transform: translateX(-101%); }
+.pill-fill__text { inset: 0 0 0 calc(100% / 11); color: #fff; white-space: nowrap; transform: translateX(111.1%); }
 :is(.pill, [data-pill-fill]):is(:hover, :focus-visible) :is(.pill-fill__pill, .pill-fill__text) {
   transform: none;
   transition: transform var(--dur-2) var(--ease-hamsa);
