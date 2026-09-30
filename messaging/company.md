@@ -65,6 +65,8 @@ Primary call to action: **Request a demo**. Secondary: **Explore applications**.
 Always pair the 2026 figures with the footnote: *"Business-impact figures are ten-year forecasts provided by a Tier 1
 brokerage institution."*
 
+Official channels: LinkedIn https://www.linkedin.com/company/hamsa-finance/ · X https://x.com/hamsafinance
+
 Clients and partners shown: Microsoft, Banco ABC Brasil, Safra National Bank, Cyberport, Banco Central do Brasil.
 
 ## Tone (from the 2026 design copy)

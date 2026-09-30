@@ -5,7 +5,7 @@ import { asset } from '../lib/asset';
 const columns = [
   { label: 'Infrastructure', links: ['Platform', 'Canonical Primitives and Verified Financial Services', 'Cloud-Native<br />Subledgers', 'Koru', 'AI Coordination'] },
   { label: 'Applications', links: ['Overview', 'Subaccounting', 'Digital Transfer<br />Agency', 'Settlement<br />and Tokenization'] },
-  { label: 'Resources', links: ['About us', 'Security, Regulatory and Disclosure'], extra: { label: 'Social', links: ['Linkedin', 'X'] } },
+  { label: 'Resources', links: ['About us', 'Security, Regulatory and Disclosure'], extra: { label: 'Social', links: [['LinkedIn', 'https://www.linkedin.com/company/hamsa-finance/'], ['X', 'https://x.com/hamsafinance']] } },
   { label: 'Legal', links: ['Terms of use', 'Privacy policy'], note: '©2027 Hamsa, LLC.<br />All rights reserved.' },
 ];
 ---
@@ -29,7 +29,7 @@ const columns = [
           {c.extra && (
             <>
               <p class="footer__label footer__label--extra">{c.extra.label}</p>
-              <ul>{c.extra.links.map((l) => <li><a href="#">{l}</a></li>)}</ul>
+              <ul>{c.extra.links.map(([l, href]) => <li><a href={href} target="_blank" rel="noopener">{l}</a></li>)}</ul>
             </>
           )}
           {c.note && <p class="footer__note" set:html={c.note} />}
