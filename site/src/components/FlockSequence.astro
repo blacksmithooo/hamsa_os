@@ -268,6 +268,13 @@ import { asset } from '../lib/asset';
   /* At this size the standard 2% settle is only ~2.5px and reads as a jitter, so this button rolls in on the
      bold variant (~4%, a visible bounce), over 1.5 × --dur-2 so the bounce has room. */
   .flock__cta:is(:hover, :focus-visible) .pill-fill__pill { transition-duration: calc(var(--dur-2) * 1.5); transition-timing-function: var(--ease-hamsa-bold); }
+  /* Once the pill starts turning back into the flock (scrolling up), drop any hover state: the black label snaps home
+     (unseen, under the black fill) and the fill fades out quickly, then resets.
+     The clip is gone by then, so a roll-off would show the black label above the pill and the fill rolling out over
+     the ring. (The browser may keep :hover until the mouse next moves, hence the overrides.) */
+  .flock__cta:not(.is-ready) > .flock__words { transform: none !important; transition: none !important; }
+  .flock__cta:not(.is-ready) .pill-fill { opacity: 0; transition: opacity calc(var(--dur-1) * 0.75) var(--ease-hamsa-exit); }
+  .flock__cta:not(.is-ready) .pill-fill__pill { transform: translateY(101%) !important; transition: transform 0s calc(var(--dur-1) * 0.75) !important; } /* reset once faded */
   .flock__scrim {
     position: absolute;
     inset: 0;
